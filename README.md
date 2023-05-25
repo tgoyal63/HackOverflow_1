@@ -1,11 +1,11 @@
 # HackOverflow_1
 
 # Links
-Backend APIs Link - https://bit.ly/HackOverflow-Backend 
+<!-- Backend APIs Link - https://bit.ly/HackOverflow-Backend  -->
 
 Documentation - https://bit.ly/HackOverflow-API-Documentation 
 
-Frontend Link - https://bit.ly/HackOverflow-Team 
+<!-- Frontend Link - https://bit.ly/HackOverflow-Team  -->
  
 ![image](https://user-images.githubusercontent.com/59612128/163394691-7fa79b91-293f-4762-8fdb-18ac6fae81ba.png)
 
