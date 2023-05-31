@@ -22,7 +22,8 @@ module.exports = {
       username = req.user.socials.github;
     }
     const baseData = {
-      graph: `https://activity-graph.herokuapp.com/graph?username=${username}&bg_color=17171F&color=FF6666&line=FFFFFF&point=FF6666&area=true&hide_border=true`,
+      // [![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=tgoyal63&bg_color=ffcfe9&color=9e4c98&line=9e4c98&point=403d3d&area=true&hide_border=true)](https://github.com/ashutosh00710/github-readme-activity-graph)
+      graph: `https://github-readme-activity-graph.vercel.app/graph?username=${username}&bg_color=17171F&color=FF6666&line=FFFFFF&point=FF6666&area=true&hide_border=true`,
       stats: `https://github-readme-stats.vercel.app/api?username=${username}&show_icons=true&hide_border=true&bg_color=17171F&title_color=FF6666&text_color=FFFFFF&icon_color=FF6666`,
       mul: `https://github-readme-stats.vercel.app/api/top-langs/?username=${username}&layout=compact&bg_color=17171F&title_color=FF6666&text_color=FFFFFF&hide_border=true&card_width=400`,
       contributions: `https://github-readme-streak-stats.herokuapp.com/?user=${username}&hide_border=true&sideNums=FFFFFF&background=17171F&currStreakNum=FFFFFF&fire=FF6666&sideLabels=FF6666&dates=FFFFFF&ring=FF6666&stroke=FF6666&currStreakLabel=FF6666`,
