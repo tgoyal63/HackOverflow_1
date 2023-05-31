@@ -56,7 +56,7 @@ import reducer from "./reducer"
 
 const token = localStorage.getItem("token")
 const loginUsername = localStorage.getItem("loginUsername")
-const BASE_URL = "http://52.172.255.213:8082"
+const baseURL = process.env.SERVER_URL ||  "http://localhost:8082";
 
 const initialState = {
   token: token,
@@ -76,7 +76,7 @@ const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const authFetch = axios.create({
-    baseURL: "http://52.172.255.213:8082",
+    baseURL,
   })
   const config = {
     headers: { Authorization: `Bearer ${state.token}` },
@@ -126,7 +126,7 @@ const AppProvider = ({ children }) => {
       type: REGISTER_USER_BEGIN,
     })
     try {
-      let { data } = await axios.post(`${BASE_URL}/signup`, currentUser)
+      let { data } = await axios.post(`${baseURL}/signup`, currentUser)
 
       dispatch({
         type: REGISTER_USER_SUCCESS,
@@ -150,7 +150,7 @@ const AppProvider = ({ children }) => {
       type: LOGIN_USER_BEGIN,
     })
     try {
-      let { data } = await axios.post(`${BASE_URL}/login`, currentUser)
+      let { data } = await axios.post(`${baseURL}/login`, currentUser)
 
       dispatch({
         type: LOGIN_USER_SUCCESS,
@@ -229,7 +229,7 @@ const AppProvider = ({ children }) => {
 
     try {
       let { data } = await axios.patch(
-        `${BASE_URL}/password`,
+        `${baseURL}/password`,
         pwdetails,
         config
       )
@@ -391,7 +391,7 @@ const AppProvider = ({ children }) => {
       type: SEARCH_USER_BEGIN,
     })
     try {
-      let { data } = await authFetch.post(`${BASE_URL}/search`, { username })
+      let { data } = await authFetch.post(`${baseURL}/search`, { username })
       let { name, socials, status, upvotes, downvotes, voteStatus } = data.data
       if (status === "friends") status = "Remove Friend"
       else if (status === "requested") status = "Cancel Request"
@@ -423,7 +423,7 @@ const AppProvider = ({ children }) => {
       type: ADD_FRIEND_BEGIN,
     })
     try {
-      let { data } = await authFetch.get(`${BASE_URL}/addfriend/${username}`)
+      let { data } = await authFetch.get(`${baseURL}/addfriend/${username}`)
 
       dispatch({
         type: ADD_FRIEND_SUCCESS,
@@ -443,7 +443,7 @@ const AppProvider = ({ children }) => {
     })
 
     try {
-      let { data } = await authFetch.get(`${BASE_URL}/friends/pending`)
+      let { data } = await authFetch.get(`${baseURL}/friends/pending`)
       let pending = data.data.friends
       dispatch({
         type: GET_PENDING_REQ_SUCCESS,
@@ -462,7 +462,7 @@ const AppProvider = ({ children }) => {
     })
 
     try {
-      let { data } = await authFetch.delete(`${BASE_URL}/delete/${username}`)
+      let { data } = await authFetch.delete(`${baseURL}/delete/${username}`)
 
       dispatch({
         type: GET_CANCEL_REQ_SUCCESS,
@@ -478,7 +478,7 @@ const AppProvider = ({ children }) => {
     })
 
     try {
-      let { data } = await authFetch.get(`${BASE_URL}/acceptfriend/${username}`)
+      let { data } = await authFetch.get(`${baseURL}/acceptfriend/${username}`)
 
       dispatch({
         type: GET_ACCEPT_REQ_SUCCESS,
@@ -494,7 +494,7 @@ const AppProvider = ({ children }) => {
     })
 
     try {
-      let { data } = await authFetch.get(`${BASE_URL}/friends/all`)
+      let { data } = await authFetch.get(`${baseURL}/friends/all`)
       let friends = data.data.friends
 
       dispatch({
@@ -514,7 +514,7 @@ const AppProvider = ({ children }) => {
     })
 
     try {
-      let { data } = await authFetch.get(`${BASE_URL}/friends/requests`)
+      let { data } = await authFetch.get(`${baseURL}/friends/requests`)
       let requests = data.data.friends
 
       dispatch({
@@ -534,7 +534,7 @@ const AppProvider = ({ children }) => {
     })
 
     try {
-      let { data } = await authFetch.get(`${BASE_URL}/upvote/${username}`)
+      let { data } = await authFetch.get(`${baseURL}/upvote/${username}`)
 
       dispatch({
         type: GET_UPVOTE_SUCCESS,
@@ -550,7 +550,7 @@ const AppProvider = ({ children }) => {
     })
 
     try {
-      let { data } = await authFetch.get(`${BASE_URL}/downvote/${username}`)
+      let { data } = await authFetch.get(`${baseURL}/downvote/${username}`)
       const { message } = data.data
       dispatch({
         type: GET_DOWNVOTE_SUCCESS,
@@ -566,7 +566,7 @@ const AppProvider = ({ children }) => {
     })
 
     try {
-      let { data } = await authFetch.get(`${BASE_URL}/removevote/${username}`)
+      let { data } = await authFetch.get(`${baseURL}/removevote/${username}`)
 
       dispatch({
         type: REMOVE_VOTE_SUCCESS,
@@ -580,7 +580,7 @@ const AppProvider = ({ children }) => {
       type: GET_GLOBAL_LEADERBOARD_BEGIN,
     })
     try {
-      let { data } = await axios.get(`${BASE_URL}/leaderboard/global`)
+      let { data } = await axios.get(`${baseURL}/leaderboard/global`)
       let globaldata = data.data
       dispatch({
         type: GET_GLOBAL_LEADERBOARD_SUCCESS,
@@ -598,7 +598,7 @@ const AppProvider = ({ children }) => {
       type: GET_FRIEND_LEADERBOARD_BEGIN,
     })
     try {
-      let { data } = await authFetch.get(`${BASE_URL}/leaderboard/friends`)
+      let { data } = await authFetch.get(`${baseURL}/leaderboard/friends`)
       let friendsdata = data.data
       dispatch({
         type: GET_FRIEND_LEADERBOARD_SUCCESS,
