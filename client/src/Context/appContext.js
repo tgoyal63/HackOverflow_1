@@ -56,7 +56,7 @@ import reducer from "./reducer"
 
 const token = localStorage.getItem("token")
 const loginUsername = localStorage.getItem("loginUsername")
-const baseURL = process.env.SERVER_URL ||  "http://localhost:8082";
+const baseURL = "https://hackoverflow-server.onrender.com";
 
 const initialState = {
   token: token,
