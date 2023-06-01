@@ -24,3 +24,14 @@ td {
 .schedule{
   padding-bottom: 15.4rem;
 }
+
+.home{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  // justify-content: space-between;
+}
+
+#friends {
+  margin-top: 60px !important;
+}

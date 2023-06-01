@@ -105,13 +105,13 @@ const NavbarComponent = ({ pathname }) => {
                 Friends
               </Nav.Link>
 
-              <Nav.Link
+              {/* <Nav.Link
                 as={Link}
                 to='/about'
                 style={{ textDecoration: "none" }}
               >
                 About
-              </Nav.Link>
+              </Nav.Link> */}
               <NavDropdown
                 ref={proRef}
                 title='Profile ▼'

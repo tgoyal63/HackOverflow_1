@@ -26,7 +26,7 @@ function App() {
             element={<ChangePassword />}
           ></Route>
           <Route exact path='/register' element={<Landing />}></Route>
-          <Route exact path='/about' element={<About />}></Route>
+          {/* <Route exact path='/about' element={<About />}></Route> */}
           <Route
             exact
             path='/search/:username'
