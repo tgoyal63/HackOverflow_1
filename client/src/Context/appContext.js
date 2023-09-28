@@ -56,7 +56,7 @@ import reducer from "./reducer"
 
 const token = localStorage.getItem("token")
 const loginUsername = localStorage.getItem("loginUsername")
-const baseURL = "https://hackoverflow-server.onrender.com";
+const baseURL = "https://hackoverflow-backend.vercel.app";
 
 const initialState = {
   token: token,

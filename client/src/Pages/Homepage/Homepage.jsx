@@ -57,9 +57,9 @@ export const Homepage = () => {
               </div>
 
               <div className='home-text-right'>
-                <span>I</span>n todays online platform where the are are lot of
-                platform to practice as well as to solve problems we have build
-                a platform by using API's Of different platform..
+                <span>I</span>n todays online platform, there are lot of
+                platforms to practice as well as to solve problems... So we built
+                a platform by using API's Of different platform to showcase user profiles and statistics.
               </div>
             </div>
           </div>
