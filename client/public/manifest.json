@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "HackOverflow",
+  "name": "HackOverflow - Integrated User Coding Stats Platform",
   "icons": [
     {
       "src": "favicon.ico",
