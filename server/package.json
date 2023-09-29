@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prykdev/HackOverflow_1.git"
+    "url": "git+https://github.com/tgoyal63/HackOverflow_1.git"
   },
   "keywords": [
     "HackOverflow",
@@ -20,9 +20,9 @@
   "author": "Tushar Goyal",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/prykdev/HackOverflow_1/issues"
+    "url": "https://github.com/tgoyal63/HackOverflow_1/issues"
   },
-  "homepage": "https://github.com/prykdev/HackOverflow_1#readme",
+  "homepage": "https://github.com/tgoyal63/HackOverflow_1#readme",
   "devDependencies": {
     "nodemon": "^2.0.15"
   },

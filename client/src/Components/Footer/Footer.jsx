@@ -51,7 +51,7 @@ export const Footer = () => {
       <div className='footer-copyright'>
         <p>
           Copyright &copy; 2022, All Right Reserved{" "}
-          <a href='https://github.com/prykdev/HackOverflow_1'> HackOverflow</a>
+          <a href='https://github.com/tgoyal63/HackOverflow_1'> HackOverflow</a>
         </p>
       </div>
     </div>
