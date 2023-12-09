@@ -18,10 +18,10 @@ export const Footer = () => {
             {" "}
             <Link to='/dashboard'>Dashboard</Link>{" "}
           </li>
-          <li>
+{/*           <li>
             {" "}
             <Link to='/about'>About</Link>{" "}
-          </li>
+          </li> */}
           <li>
             {" "}
             <Link to='/leaderboard'>Leaderboard </Link>{" "}
