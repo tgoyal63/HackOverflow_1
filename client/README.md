@@ -6,13 +6,41 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
-### `npm start`
+### `npm run dev`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
+
+### `npm start`
+
+Serves the existing production `build` directory with `serve-handler`, including fallback
+to `index.html` for React Router links. Run `npm run build` first. The server binds
+to `0.0.0.0` on `PORT` (default `3000`) and does not compile or watch source files.
+If the port is already in use, startup fails instead of choosing a different port.
+
+### `npm run test:production`
+
+After building, runs HTTP smoke tests against the actual `npm start` command on a
+temporary port. Requires Node.js 18 or later.
+
+## Render web service
+
+For the existing frontend service `srv-chrqa464dadfn66u54eg`, use:
+
+- Node.js: `22.x` (declared in `package.json` and checked in a Linux container)
+- Root directory: `client`
+- Build command: `npm ci && npm run build`
+- Start command: `npm start`
+- Health check path: `/`
+- Instance type: **Free** (512 MB)
+
+Compilation belongs in the build phase. Running the development server or building
+inside the start command consumes the web service's limited runtime memory.
+The frontend continues to call the separately hosted backend configured in
+`src/Context/appContext.js`.
 
 ### `npm test`
 
