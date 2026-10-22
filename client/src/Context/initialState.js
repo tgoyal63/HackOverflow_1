@@ -29,7 +29,12 @@ const platformState = {
 
 const initialState = {
   ...platformState,
+  resources: Object.fromEntries([
+    "profile", "search", "github", "hackerrank", "codechef", "friends",
+    "pending", "requests", "globalLeaderboard", "friendsLeaderboard",
+  ].map((key) => [key, { status: "idle", message: "", httpStatus: null }])),
   token: null,
+  accountProfile: null,
   loginUsername: null,
   isGithubError: false,
   isError: false,

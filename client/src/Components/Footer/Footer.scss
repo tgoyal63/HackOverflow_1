@@ -1,69 +1,58 @@
-.footer {
-  display: flex;
-  margin-top: auto;
-  justify-content: center;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
-  background-color: #FF6666;
-  bottom: 0;
-
-  .footer-navlinks {
-    ul {
-      display: flex;
-      padding: 0px;
-      margin: 0px;
-      justify-content: center;
-      gap: 1.5rem;
-      list-style: none;
-
-      li {
-        a {
-          text-decoration: none;
-          color: aliceblue;
-        }
-      }
-      li {
-        a:hover {
-          text-decoration: none;
-          color: #121217;
-        }
-      }
-    }
-  }
-
-  .footer-logo {
-    margin-top: 20px;
-    font-size: 40px;
-    font-weight: 800;
-    color: #fff;
-  }
-
-  .footer-logo > span {
-    color: #121217;
-  }
-
-  .footer-socials {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    font-size: 2rem;
-  }
-
-  .footer-socials > div > i{
-    cursor: pointer;
-  }
-
-  .footer-copyright {
-    color: #121217;
-  }
-  .footer-copyright > p > a{
-    color: #121217;
-    font-weight: bold;
-    text-decoration: none;
-  }
-
-  .footer-copyright > p > a:hover{
-    color: white;
-  }
+.site-footer,
+.workspace-footer {
+	border-top: 1px solid var(--border);
+	padding: 22px 40px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	color: var(--subtle);
+	font-size: 10px;
+	line-height: 1.7;
+}
+.site-footer {
+	max-width: 1240px;
+	width: 100%;
+	margin: auto;
+	padding: 26px 32px;
+}
+.workspace-footer {
+	margin-left: 232px;
+}
+.site-footer nav,
+.workspace-footer nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 22px;
+}
+.site-footer a,
+.workspace-footer a {
+	color: var(--muted);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.site-footer a:hover,
+.workspace-footer a:hover {
+	color: var(--text);
+}
+.footer-separator {
+	color: #495161;
+	padding: 0 12px;
+}
+@media (max-width: 800px) {
+	.workspace-footer {
+		margin-left: 0;
+	}
+	.site-footer,
+	.workspace-footer {
+		padding: 22px 20px;
+		flex-wrap: wrap;
+		font-size: 10px;
+		gap: 14px;
+	}
+	.footer-tagline,
+	.footer-separator {
+		display: none;
+	}
 }

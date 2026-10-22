@@ -1,76 +1,34 @@
-import {useEffect} from "react"
-import "./Hackerrank.scss"
+import { useEffect } from "react"
 import { useAppContext } from "../../Context/appContext"
-import { Container, Row, Col, Card} from "react-bootstrap"
+import { Metric, PlatformPanel, hasValue } from "../Github/PlatformParts"
+import "./Hackerrank.scss"
 
-const Hackerrank = (props) => {
-  const { username } = props;
-  const {
-    getHackerrank,
-    hackerrankUsername,
-    hackerrank_created_at,
-    level,
-    followers_count,
-    totalSubmissions,
-    totalBadges,
-    badgeData,
-  } = useAppContext()
+const Hackerrank = ({ username }) => {
+  const context = useAppContext()
+  const { getHackerrank, hackerrankUsername, hackerrank_created_at, level, followers_count,
+    totalSubmissions, totalBadges, badgeData } = context
   useEffect(() => {
     if (typeof username === "string") getHackerrank(username)
   }, [getHackerrank, username])
-  return (
-    <div className='hackerrank'>
-      <Container>
-        <div className='header'>
-          <h3 className='heading'>Hackerrank</h3>
-          {/* <img src={require("../../assets/GitHub-Mark-Light-32px.png")}  alt="github" /> */}
-          <h6>
-            username: <span className='username'>{hackerrankUsername}</span>
-          </h6>
-        </div>
-        <Row>
-          <Col lg={6} className='githubStats'>
-            <Card className='g-card'>
-              <Card.Body>
-                <Card.Title>Hackerrank Data</Card.Title>
-                <Card.Text as="div">
-                  <Row>
-                    <Col lg={6}>Level: {level}</Col>
-                    <Col lg={6}>Followers: {followers_count}</Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>Submission: {totalSubmissions}</Col>
-                    <Col lg={6}>Badges: {totalBadges}</Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>Created: {hackerrank_created_at}</Col>
-                  </Row>
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col lg={6} className='githubStats'>
-            <Card className='g-card'>
-              <Card.Body>
-                <Card.Title>Hackerrank Badges</Card.Title>
-                <Card.Text as="div">
-                  <Row>
-                    {badgeData?.map((badge) => {
-                        return (
-                          <Col key={badge.badge_name} lg={6} className='p-2'>
-                            {badge.badge_name} {badge.stars}⭐
-                          </Col>
-                        )
-                      })}
-                  </Row>
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+  const hasData = [level, followers_count, totalSubmissions, totalBadges].some(hasValue)
+  return <PlatformPanel platform="hackerrank" title="HackerRank" eyebrow="Problem solving" username={username}
+    handle={hackerrankUsername} resource={context.resources?.hackerrank} hasData={hasData}
+    href={`https://www.hackerrank.com/${encodeURIComponent(hackerrankUsername || username || "")}`}
+    onRetry={() => getHackerrank(username)}>
+    <dl className="platform-metrics">
+      <Metric label="Submissions" value={totalSubmissions} featured />
+      <Metric label="Badges" value={totalBadges} featured />
+      <Metric label="Level" value={level} />
+      <Metric label="Followers" value={followers_count} />
+      <Metric label="Joined HackerRank" value={hackerrank_created_at} />
+    </dl>
+    <div className="platform-badges"><h3>Skill badges</h3>
+      {Array.isArray(badgeData) && badgeData.length > 0
+        ? <ul>{badgeData.map((badge) => <li key={badge.badge_name}><span>{badge.badge_name}</span>
+          <span className="platform-badge-stars">{hasValue(badge.stars) ? `${badge.stars} stars` : "Stars unavailable"}</span></li>)}</ul>
+        : <p className="muted">{totalBadges === 0 ? "No badges reported yet." : "Badge details are not available."}</p>}
     </div>
-  )
+  </PlatformPanel>
 }
 
 export default Hackerrank

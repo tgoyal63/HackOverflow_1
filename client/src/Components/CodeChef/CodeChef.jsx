@@ -1,108 +1,40 @@
 import { useEffect } from "react"
-import "./CodeChef.scss"
 import { useAppContext } from "../../Context/appContext"
-import { Container, Row, Col, Card } from "react-bootstrap"
+import { Metric, PlatformPanel, hasValue } from "../Github/PlatformParts"
+import "./CodeChef.scss"
 
-const CodeChef = (props) => {
-  const { username } = props
-  const {
-    getCodechef,
-    codechefUsername,
-    ratings,
-    language,
-    band,
-    div,
-    global,
-    country,
-    submissionStats,
-  } = useAppContext()
+const CodeChef = ({ username }) => {
+  const context = useAppContext()
+  const { getCodechef, codechefUsername, ratings, language, band, div, global, country, submissionStats } = context
   useEffect(() => {
     if (typeof username === "string") getCodechef(username)
   }, [getCodechef, username])
-  return (
-    <div className='codechef'>
-      <Container>
-        <div className='header'>
-          <h3 className='heading'>Codechef</h3>
-          <h6>
-            username: <span className='username'>{codechefUsername}</span>
-          </h6>
-        </div>
-        <Row>
-          <Col lg={6} className='codechefStats'>
-            <Card className='g-card'>
-              <Card.Body>
-                <Card.Title>CodeChef Data</Card.Title>
-                <Card.Text as="div">
-                  <Row>
-                    <Col lg={6}>Ratings: {ratings}</Col>
-                    <Col lg={6}>Global Rank: {global}</Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>Language: {language}</Col>
-                    <Col lg={6}>Country Rank: {country}</Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>Band: {band}</Col>
-                    <Col lg={6}>Div: {div}</Col>
-                  </Row>
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col lg={6} className='codechefStats'>
-            <Card className='g-card'>
-              <Card.Body>
-                <Card.Title>CodeChef Submission Stats</Card.Title>
-                <Card.Text as="div">
-                  <Row>
-                    <Col lg={6}>
-                      Partially Solved:{" "}
-                      {submissionStats?.partiallySolvedProblems}
-                    </Col>
-                    <Col lg={6}>
-                      Solved Problems:{" "}
-                      {submissionStats?.solvedProblems}
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>
-                      Attempted Problems:{" "}
-                      {submissionStats?.attemptedProblems}
-                    </Col>
-                    <Col lg={6}>
-                      Time Limit exceeded:{" "}
-                      {submissionStats?.timeLimitExceed}
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>
-                      Submitted Solutions:{" "}
-                      {submissionStats?.submittedSolutions}
-                    </Col>
-                    <Col lg={6}>
-                      Wrong Submissions:{" "}
-                      {submissionStats?.wrongSubmissions}
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>
-                      Accepted Submission:{" "}
-                      {submissionStats?.acceptedSubmissions}
-                    </Col>
-                    <Col lg={6}>
-                      RunTime Error:{" "}
-                      {submissionStats?.runTimeError}
-                    </Col>
-                  </Row>
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+  const hasData = [ratings, global, country, div, language, band, ...Object.values(submissionStats || {})].some(hasValue)
+  return <PlatformPanel platform="codechef" title="CodeChef" eyebrow="Competitive programming" username={username}
+    handle={codechefUsername} resource={context.resources?.codechef} hasData={hasData}
+    href={`https://www.codechef.com/users/${encodeURIComponent(codechefUsername || username || "")}`}
+    onRetry={() => getCodechef(username)}>
+    <dl className="platform-metrics">
+      <Metric label="Contest rating" value={ratings} featured />
+      <Metric label="Global rank" value={global} featured />
+      <Metric label="Country rank" value={country} />
+      <Metric label="Division" value={div} />
+      <Metric label="Band" value={band} />
+      <Metric label="Language" value={language} />
+    </dl>
+    <div className="platform-submissions"><h3>Submission statistics</h3>
+      <dl className="platform-metrics platform-metrics-compact">
+        <Metric label="Solved problems" value={submissionStats?.solvedProblems} />
+        <Metric label="Accepted submissions" value={submissionStats?.acceptedSubmissions} />
+        <Metric label="Attempted problems" value={submissionStats?.attemptedProblems} />
+        <Metric label="Submitted solutions" value={submissionStats?.submittedSolutions} />
+        <Metric label="Partially solved" value={submissionStats?.partiallySolvedProblems} />
+        <Metric label="Wrong submissions" value={submissionStats?.wrongSubmissions} />
+        <Metric label="Time limit exceeded" value={submissionStats?.timeLimitExceed} />
+        <Metric label="Runtime errors" value={submissionStats?.runTimeError} />
+      </dl>
     </div>
-  )
+  </PlatformPanel>
 }
 
 export default CodeChef

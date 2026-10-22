@@ -1,58 +1,29 @@
-import "./Footer.scss"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom";
+import { Icon } from "../UI/Icon";
+import "./Footer.scss";
 
-export const Footer = () => {
-  return (
-    <div className='footer h-30 w-100'>
-      <div className='footer-head'>
-        <div className='footer-logo' style={{ cursor: "pointer" }}>
-          {" "}
-          <span>Ha</span>ck<span>Ov</span>er<span>flow</span>
-        </div>
-      </div>
-
-      <div className='footer-navlinks'>
-        <ul>
-          <li>
-            {" "}
-            <Link to='/dashboard'>Dashboard</Link>{" "}
-          </li>
-{/*           <li>
-            {" "}
-            <Link to='/about'>About</Link>{" "}
-          </li> */}
-          <li>
-            {" "}
-            <Link to='/leaderboard'>Leaderboard </Link>{" "}
-          </li>
-          <li>
-            {" "}
-            <Link to='/friends'>Friends </Link>{" "}
-          </li>
-          {/* <li>
-            {" "}
-            <a href="#">Settings </a>{" "}
-          </li> */}
-        </ul>
-      </div>
-
-      <div className='footer-socials'>
-        <div>
-          <i className='fa fa-twitter'></i>
-        </div>
-        <div>
-          <i className='fa fa-linkedin'></i>
-        </div>
-        <div>
-          <i className='fa fa-instagram'></i>
-        </div>
-      </div>
-      <div className='footer-copyright'>
-        <p>
-          Copyright &copy; 2022, All Right Reserved{" "}
-          <a href='https://github.com/tgoyal63/HackOverflow_1'> HackOverflow</a>
-        </p>
-      </div>
-    </div>
-  )
+export function Footer() {
+	const { pathname } = useLocation();
+	const publicPage = pathname === "/" || pathname === "/register";
+	return (
+		<footer className={publicPage ? "site-footer" : "workspace-footer"}>
+			<span>
+				© {new Date().getFullYear()} HackOverflow
+				<span className="footer-separator">/</span>
+				<span className="footer-tagline">Made for your next chapter.</span>
+			</span>
+			<nav aria-label="Footer navigation">
+				<Link to="/leaderboard">Leaderboard</Link>
+				<a
+					href="https://github.com/tgoyal63/HackOverflow_1"
+					target="_blank"
+					rel="noreferrer"
+				>
+					<Icon name="github" size={14} />
+					Source code
+					<Icon name="external" size={12} />
+				</a>
+			</nav>
+		</footer>
+	);
 }

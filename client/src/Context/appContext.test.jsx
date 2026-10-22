@@ -53,6 +53,22 @@ const profile = (username) => ({
   } },
 })
 
+test("own account snapshot survives another developer search and failed own refresh", async () => {
+  const app = mountProvider()
+  requestMock.mockResolvedValueOnce(profile("alice"))
+  expect(await run(() => app.read().getUser())).toBe(true)
+  const searched = profile("bob")
+  searched.data.data.upvotes = 999
+  requestMock.mockResolvedValueOnce(searched)
+  expect(await run(() => app.read().searchUser("bob"))).toBe(true)
+  requestMock.mockRejectedValueOnce({ response: { status: 503 } })
+  expect(await run(() => app.read().getUser())).toBe(false)
+  expect(app.read().name).toBe("bob")
+  expect(app.read().accountProfile).toMatchObject({ name: "alice", username: "alice", upvotes: 3, downvotes: 1 })
+  act(() => app.read().logoutUser())
+  expect(app.read().accountProfile).toBeNull()
+})
+
 beforeEach(() => {
   vi.clearAllMocks()
   requestMock.mockReset()
@@ -219,6 +235,7 @@ test("only the latest searched profile is shown when responses arrive out of ord
     oldRequest = app.read().searchUser("old-user")
     newRequest = app.read().searchUser("new-user")
   })
+  expect(app.read().resources.search).toMatchObject({ status: "loading", identity: "new-user" })
   expect(requestMock.mock.calls[0][0].signal.aborted).toBe(true)
   newProfile.resolve({ data: { data: { name: "new-user", status: "friends" } } })
   expect(await run(() => newRequest)).toBe(true)
@@ -226,6 +243,7 @@ test("only the latest searched profile is shown when responses arrive out of ord
   expect(await run(() => oldRequest)).toBe(false)
   expect(app.read().name).toBe("new-user")
   expect(app.read().status).toBe("Remove Friend")
+  expect(app.read().resources.search).toMatchObject({ status: "success", identity: "new-user" })
 })
 
 test("platform errors reset on retry and older requests cannot overwrite the latest handle", async () => {
@@ -295,7 +313,7 @@ test.each([
   ["acceptReq", "friend", "get", "/acceptfriend/friend"],
   ["getUpVote", "friend", "get", "/upvote/friend"],
   ["getDownVote", "friend", "get", "/downvote/friend"],
-  ["removeVote", "friend", "get", "/removevote/friend"],
+  ["removeVote", "friend", "delete", "/removevote/friend"],
 ])("%s preserves its request contract and reports a failed request as false", async (method, input, httpMethod, url) => {
   const app = mountProvider()
   requestMock.mockRejectedValueOnce(new Error("Network Error"))
@@ -307,4 +325,80 @@ test.each([
 
   requestMock.mockResolvedValueOnce({ status: 204 })
   expect(await run(() => app.read()[method](input))).toBe(true)
+})
+
+test.each([
+  ["profile", "getUser", undefined, profile("zero-user")],
+  ["search", "searchUser", "zero-user", { data: { data: { name: "Zero", status: "add", upvotes: 0, downvotes: 0 } } }],
+  ["github", "getGithub", "zero-user", { data: { data: { githubUsername: "zero-user", public_repos: 0 } } }],
+  ["hackerrank", "getHackerrank", "zero-user", { data: { data: { hackerrankUsername: "zero-user", totalBadges: 0 } } }],
+  ["codechef", "getCodechef", "zero-user", { data: { data: { codechefUsername: "zero-user", ratings: 0, rankings: { global: 0, country: 0 } } } }],
+  ["friends", "getFriendsReq", undefined, { data: { data: { friends: [] } } }],
+  ["pending", "getPendingReq", undefined, { data: { data: { friends: [] } } }],
+  ["requests", "getRequestsReq", undefined, { data: { data: { friends: [] } } }],
+  ["globalLeaderboard", "getGlobalLeaderboard", undefined, { data: { data: [] } }],
+  ["friendsLeaderboard", "getFriendsLeaderboard", undefined, { data: { data: [] } }],
+])("%s distinguishes idle, loading, success, and a failed retry without exposing server details", async (key, method, input, response) => {
+  const app = mountProvider()
+  expect(app.read().resources[key]).toEqual({ status: "idle", message: "", httpStatus: null })
+  const pending = deferred()
+  requestMock.mockReturnValueOnce(pending.promise)
+  let result
+  act(() => { result = app.read()[method](input) })
+  expect(app.read().resources[key].status).toBe("loading")
+  pending.resolve(response)
+  expect(await run(() => result)).toBe(true)
+  expect(app.read().resources[key]).toMatchObject({ status: "success", message: "", httpStatus: null })
+
+  requestMock.mockRejectedValueOnce({ response: { status: 503, data: { message: "secret credential data" } }, message: "secret credential data" })
+  expect(await run(() => app.read()[method](input))).toBe(false)
+  expect(app.read().resources[key]).toMatchObject({ status: "error", httpStatus: 503 })
+  expect(app.read().resources[key].message).toContain("temporarily unavailable")
+  expect(JSON.stringify(app.read().resources)).not.toContain("secret credential data")
+  expect(app.read().resources[key].message.length).toBeLessThan(180)
+})
+
+test("a cancelled profile cannot publish success or an error over a search resource", async () => {
+  const app = mountProvider()
+  const original = deferred()
+  const search = deferred()
+  requestMock.mockReturnValueOnce(original.promise).mockReturnValueOnce(search.promise)
+  let profileRequest
+  let searchRequest
+  act(() => {
+    profileRequest = app.read().getUser()
+    searchRequest = app.read().searchUser("next-user")
+  })
+  expect(app.read().resources.profile.status).toBe("idle")
+  expect(app.read().resources.search.status).toBe("loading")
+  original.reject({ response: { status: 500 } })
+  expect(await run(() => profileRequest)).toBe(false)
+  expect(app.read().resources.profile.status).toBe("idle")
+  expect(app.read().resources.search.status).toBe("loading")
+  search.resolve({ data: { data: { name: "Next", status: "add" } } })
+  expect(await run(() => searchRequest)).toBe(true)
+  expect(app.read().resources.search.status).toBe("success")
+  act(() => app.read().logoutUser())
+  expect(Object.values(app.read().resources).every((resource) => resource.status === "idle")).toBe(true)
+})
+
+test("a stale platform failure cannot replace the latest resource identity or status", async () => {
+  const app = mountProvider()
+  const older = deferred()
+  const newer = deferred()
+  requestMock.mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise)
+  let oldRequest
+  let newRequest
+  act(() => {
+    oldRequest = app.read().getGithub("old-user")
+    newRequest = app.read().getGithub("")
+  })
+  expect(app.read().resources.github).toMatchObject({ status: "loading", identity: "" })
+  older.reject({ response: { status: 404 } })
+  expect(await run(() => oldRequest)).toBe(false)
+  expect(app.read().resources.github).toMatchObject({ status: "loading", identity: "" })
+  newer.resolve({ data: { data: { githubUsername: "own-user", public_repos: 0 } } })
+  expect(await run(() => newRequest)).toBe(true)
+  expect(app.read().resources.github).toMatchObject({ status: "success", identity: "" })
+  expect(app.read().public_repos).toBe(0)
 })

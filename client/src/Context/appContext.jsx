@@ -8,6 +8,20 @@ const baseURL = import.meta.env.VITE_API_BASE_URL || "https://hackoverflow-backe
 const AppContext = React.createContext()
 
 class CancelledRequest extends Error {}
+class SessionRequired extends Error {}
+
+const readableError = (error) => {
+  const responseStatus = error instanceof SessionRequired ? 401 : error?.response?.status
+  const httpStatus = Number.isInteger(responseStatus) && responseStatus >= 100 && responseStatus <= 599 ? responseStatus : null
+  let message = "Unable to load this data. Please try again."
+  if (httpStatus === null) message = "Connection unavailable. Check your connection and try again."
+  else if (httpStatus === 401) message = "Sign in to continue."
+  else if (httpStatus === 403) message = "Access to this data is restricted."
+  else if (httpStatus === 404) message = "This profile or resource was not found. Check the username and try again."
+  else if (httpStatus === 429) message = "The provider's request limit was reached. Please try again shortly."
+  else if (httpStatus >= 500) message = "The service is temporarily unavailable. Please try again shortly."
+  return { message, httpStatus }
+}
 
 const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, undefined, readInitialState)
@@ -58,20 +72,24 @@ const AppProvider = ({ children }) => {
     authenticated = true,
     logoutOnUnauthorized = true,
     key,
+    resource = key === "authentication" ? undefined : key,
   } = {}) => {
     const session = sessionRef.current
-    if (!mountedRef.current || (authenticated && !tokenRef.current)) {
-      throw new CancelledRequest()
-    }
+    if (!mountedRef.current) throw new CancelledRequest()
+    if (authenticated && !tokenRef.current) throw new SessionRequired()
 
     const controller = new AbortController()
     if (key) {
-      latestRequestsRef.current.get(key)?.abort()
-      latestRequestsRef.current.set(key, controller)
+      const previous = latestRequestsRef.current.get(key)
+      previous?.controller.abort()
+      if (previous?.resource && previous.resource !== resource) {
+        dispatch({ type: actions.RESET_RESOURCE, payload: { key: previous.resource } })
+      }
+      latestRequestsRef.current.set(key, { controller, resource })
     }
     inFlightRef.current.add(controller)
     const isCurrent = () => mountedRef.current && sessionRef.current === session &&
-      !controller.signal.aborted && (!key || latestRequestsRef.current.get(key) === controller)
+      !controller.signal.aborted && (!key || latestRequestsRef.current.get(key)?.controller === controller)
 
     try {
       const response = await authFetch.request({
@@ -94,7 +112,7 @@ const AppProvider = ({ children }) => {
       throw error
     } finally {
       inFlightRef.current.delete(controller)
-      if (key && latestRequestsRef.current.get(key) === controller) {
+      if (key && latestRequestsRef.current.get(key)?.controller === controller) {
         latestRequestsRef.current.delete(key)
       }
     }
@@ -102,7 +120,7 @@ const AppProvider = ({ children }) => {
 
   const dispatchError = useCallback((type, error) => {
     if (!(error instanceof CancelledRequest) && !axios.isCancel(error)) {
-      dispatch({ type, payload: { msg: error.message } })
+      dispatch({ type, payload: readableError(error) })
     }
   }, [])
 
@@ -151,10 +169,11 @@ const AppProvider = ({ children }) => {
           upvotes, downvotes, loginUsername: username },
       })
       return true
-    } catch {
+    } catch (error) {
+      dispatchError(actions.GET_USER_ERROR, error)
       return false
     }
-  }, [request])
+  }, [request, dispatchError])
 
   const editSocials = useCallback(async (socials) => {
     dispatch({ type: actions.EDIT_SOCIALS_BEGIN })
@@ -189,7 +208,7 @@ const AppProvider = ({ children }) => {
 
   const getGithub = useCallback(async (username) => {
     if (typeof username !== "string") return false
-    dispatch({ type: actions.GET_GITHUBDATA_BEGIN })
+    dispatch({ type: actions.GET_GITHUBDATA_BEGIN, payload: { identity: username } })
     try {
       const { data } = await request("get", username ? `/github/${encodeURIComponent(username)}` : "/github", { key: "github" })
       dispatch({ type: actions.GET_GITHUBDATA_SUCCESS, payload: data.data })
@@ -202,7 +221,7 @@ const AppProvider = ({ children }) => {
 
   const getHackerrank = useCallback(async (username) => {
     if (typeof username !== "string") return false
-    dispatch({ type: actions.GET_HACKERRANKDATA_BEGIN })
+    dispatch({ type: actions.GET_HACKERRANKDATA_BEGIN, payload: { identity: username } })
     try {
       const { data } = await request("get", username ? `/hackerrank/${encodeURIComponent(username)}` : "/hackerrank", { key: "hackerrank" })
       dispatch({ type: actions.GET_HACKERRANKDATA_SUCCESS, payload: data.data })
@@ -215,7 +234,7 @@ const AppProvider = ({ children }) => {
 
   const getCodechef = useCallback(async (username) => {
     if (typeof username !== "string") return false
-    dispatch({ type: actions.GET_CODECHEFDATA_BEGIN })
+    dispatch({ type: actions.GET_CODECHEFDATA_BEGIN, payload: { identity: username } })
     try {
       const { data } = await request("get", username ? `/codechef/${encodeURIComponent(username)}` : "/codechef", { key: "codechef" })
       const { rankings, ...profile } = data.data
@@ -229,12 +248,12 @@ const AppProvider = ({ children }) => {
 
   const searchUser = useCallback(async (username) => {
     for (const key of ["github", "hackerrank", "codechef"]) {
-      latestRequestsRef.current.get(key)?.abort()
+      latestRequestsRef.current.get(key)?.controller.abort()
       latestRequestsRef.current.delete(key)
     }
-    dispatch({ type: actions.SEARCH_USER_BEGIN })
+    dispatch({ type: actions.SEARCH_USER_BEGIN, payload: { identity: username } })
     try {
-      const { data } = await request("post", "/search", { data: { username }, key: "profile" })
+      const { data } = await request("post", "/search", { data: { username }, key: "profile", resource: "search" })
       const statuses = { friends: "Remove Friend", requested: "Cancel Request", pending: "Accept Request" }
       dispatch({ type: actions.SEARCH_USER_SUCCESS, payload: {
         ...data.data, status: statuses[data.data.status] || "Add Friend",
@@ -264,10 +283,11 @@ const AppProvider = ({ children }) => {
       const { data } = await request("get", "/friends/pending", { key: "pending" })
       dispatch({ type: actions.GET_PENDING_REQ_SUCCESS, payload: { pending: data.data.friends } })
       return true
-    } catch {
+    } catch (error) {
+      dispatchError(actions.GET_PENDING_REQ_ERROR, error)
       return false
     }
-  }, [request])
+  }, [request, dispatchError])
 
   const getCancelReq = useCallback(async (username) => {
     dispatch({ type: actions.GET_CANCEL_REQ_BEGIN })
@@ -297,10 +317,11 @@ const AppProvider = ({ children }) => {
       const { data } = await request("get", "/friends/all", { key: "friends" })
       dispatch({ type: actions.GET_FRIENDS_REQ_SUCCESS, payload: { friends: data.data.friends } })
       return true
-    } catch {
+    } catch (error) {
+      dispatchError(actions.GET_FRIENDS_REQ_ERROR, error)
       return false
     }
-  }, [request])
+  }, [request, dispatchError])
 
   const getRequestsReq = useCallback(async () => {
     dispatch({ type: actions.GET_REQUESTS_REQ_BEGIN })
@@ -308,10 +329,11 @@ const AppProvider = ({ children }) => {
       const { data } = await request("get", "/friends/requests", { key: "requests" })
       dispatch({ type: actions.GET_REQUESTS_REQ_SUCCESS, payload: { requests: data.data.friends } })
       return true
-    } catch {
+    } catch (error) {
+      dispatchError(actions.GET_REQUESTS_REQ_ERROR, error)
       return false
     }
-  }, [request])
+  }, [request, dispatchError])
 
   const getUpVote = useCallback(async (username) => {
     dispatch({ type: actions.GET_UPVOTE_BEGIN })
@@ -338,7 +360,7 @@ const AppProvider = ({ children }) => {
   const removeVote = useCallback(async (username) => {
     dispatch({ type: actions.REMOVE_VOTE_BEGIN })
     try {
-      await request("get", `/removevote/${encodeURIComponent(username)}`)
+      await request("delete", `/removevote/${encodeURIComponent(username)}`)
       dispatch({ type: actions.REMOVE_VOTE_SUCCESS })
       return true
     } catch {
@@ -352,10 +374,11 @@ const AppProvider = ({ children }) => {
       const { data } = await request("get", "/leaderboard/global", { authenticated: false, key: "globalLeaderboard" })
       dispatch({ type: actions.GET_GLOBAL_LEADERBOARD_SUCCESS, payload: { globaldata: data.data } })
       return true
-    } catch {
+    } catch (error) {
+      dispatchError(actions.GET_GLOBAL_LEADERBOARD_ERROR, error)
       return false
     }
-  }, [request])
+  }, [request, dispatchError])
 
   const getFriendsLeaderboard = useCallback(async () => {
     dispatch({ type: actions.GET_FRIEND_LEADERBOARD_BEGIN })
@@ -363,10 +386,11 @@ const AppProvider = ({ children }) => {
       const { data } = await request("get", "/leaderboard/friends", { key: "friendsLeaderboard" })
       dispatch({ type: actions.GET_FRIEND_LEADERBOARD_SUCCESS, payload: { friendsdata: data.data } })
       return true
-    } catch {
+    } catch (error) {
+      dispatchError(actions.GET_FRIEND_LEADERBOARD_ERROR, error)
       return false
     }
-  }, [request])
+  }, [request, dispatchError])
 
   return (
     <AppContext.Provider value={{

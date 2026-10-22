@@ -52,7 +52,38 @@ import {
 } from "./action"
 import { initialState, platformState } from "./initialState"
 
+const resourceActions = Object.fromEntries([
+  ["GET_USER", "profile"], ["SEARCH_USER", "search"],
+  ["GET_GITHUBDATA", "github"], ["GET_HACKERRANKDATA", "hackerrank"],
+  ["GET_CODECHEFDATA", "codechef"], ["GET_FRIENDS_REQ", "friends"],
+  ["GET_PENDING_REQ", "pending"], ["GET_REQUESTS_REQ", "requests"],
+  ["GET_GLOBAL_LEADERBOARD", "globalLeaderboard"], ["GET_FRIEND_LEADERBOARD", "friendsLeaderboard"],
+].flatMap(([prefix, key]) => [
+  [`${prefix}_BEGIN`, { key, status: "loading" }],
+  [`${prefix}_SUCCESS`, { key, status: "success" }],
+  [`${prefix}_ERROR`, { key, status: "error" }],
+]))
+
 const reducer = (state, action) => {
+  const resource = resourceActions[action.type]
+  if (resource) {
+    state = {
+      ...state,
+      resources: {
+        ...state.resources,
+        [resource.key]: {
+          ...(state.resources?.[resource.key]?.identity !== undefined && { identity: state.resources[resource.key].identity }),
+          ...(resource.status === "loading" && action.payload?.identity !== undefined && { identity: action.payload.identity }),
+          status: resource.status,
+          message: resource.status === "error" ? action.payload?.message || "Unable to load this data. Please try again." : "",
+          httpStatus: resource.status === "error" ? action.payload?.httpStatus ?? null : null,
+        },
+      },
+    }
+  }
+  if (action.type === "RESET_RESOURCE") {
+    return { ...state, resources: { ...state.resources, [action.payload.key]: { status: "idle", message: "", httpStatus: null } } }
+  }
   if (action.type === REGISTER_USER_BEGIN) {
     return { ...state }
   }
@@ -109,6 +140,9 @@ const reducer = (state, action) => {
   if (action.type === GET_USER_SUCCESS) {
     return {
       ...state,
+      // Search fields describe the viewed developer. Retain the signed-in
+      // account separately so a failed refresh cannot mix their identities.
+      accountProfile: { ...action.payload },
       email: action.payload.email,
       username: action.payload.username,
       name: action.payload.name,
@@ -135,7 +169,7 @@ const reducer = (state, action) => {
     return { ...state, isError: false }
   }
   if (action.type === CHANGE_PW_SUCCESS) {
-    return { ...state, token: action.payload.token, isError: false }
+    return { ...state, token: action.payload.token, isError: false, resources: initialState.resources }
   }
   if (action.type === CHANGE_PW_ERROR) {
     return { ...state, isError: true }
@@ -208,6 +242,12 @@ const reducer = (state, action) => {
     return {
       ...state,
       ...platformState,
+      resources: {
+        ...state.resources,
+        github: initialState.resources.github,
+        hackerrank: initialState.resources.hackerrank,
+        codechef: initialState.resources.codechef,
+      },
       name: undefined,
       socials: undefined,
       status: undefined,

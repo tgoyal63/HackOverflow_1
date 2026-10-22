@@ -1,38 +1,103 @@
-import "./App.scss"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
-import Landing from "./Pages/Landing/Landing"
-import Leaderboard from "./Pages/Leaderboard/Leaderboard"
-import Setting from "./Pages/Settings/Setting"
-import ChangePassword from "./Pages/ChangePassword/ChangePassword"
-import { Homepage } from "./Pages/Homepage/Homepage"
-import Dashboard from "./Pages/Dashboard/Dashboard"
-import SearchDashboard from "./Pages/SearchDashboard/SearchDashboard"
-import Friends from "./Pages/Friends/Friends"
+import "./App.scss";
+import { useEffect } from "react";
+import {
+	BrowserRouter,
+	Routes,
+	Route,
+	useLocation,
+	Link,
+} from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Landing from "./Pages/Landing/Landing";
+import Leaderboard from "./Pages/Leaderboard/Leaderboard";
+import Setting from "./Pages/Settings/Setting";
+import ChangePassword from "./Pages/ChangePassword/ChangePassword";
+import { Homepage } from "./Pages/Homepage/Homepage";
+import Dashboard from "./Pages/Dashboard/Dashboard";
+import SearchDashboard from "./Pages/SearchDashboard/SearchDashboard";
+import Friends from "./Pages/Friends/Friends";
+import NavbarComponent from "./Components/Navbar/NavbarComponent";
+import { Footer } from "./Components/Footer/Footer";
+import { Icon } from "./Components/UI/Icon";
 
-function App() {
-  return (
-      <BrowserRouter>
-        <Routes>
-          <Route path='/dashboard' element={<Dashboard />}></Route>
-          <Route path='/leaderboard' element={<Leaderboard />}></Route>
-          <Route exact path='/' element={<Homepage />}></Route>
-          <Route path='/settings' element={<Setting />}></Route>
-          <Route path='/friends' element={<Friends />}></Route>
-          <Route
-            exact
-            path='/changepassword'
-            element={<ChangePassword />}
-          ></Route>
-          <Route exact path='/register' element={<Landing />}></Route>
-          {/* <Route exact path='/about' element={<About />}></Route> */}
-          <Route
-            exact
-            path='/search/:username'
-            element={<SearchDashboard />}
-          ></Route>
-        </Routes>
-      </BrowserRouter>
-  )
+const pageTitles = {
+	"/": "Your coding life, connected",
+	"/dashboard": "Dashboard",
+	"/register": "Your account",
+	"/friends": "Friends",
+	"/leaderboard": "Leaderboard",
+	"/settings": "Settings",
+	"/changepassword": "Security",
+};
+function RouteEffects() {
+	const { pathname } = useLocation();
+	useEffect(() => {
+		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+		document.title = `${pageTitles[pathname] || (pathname.startsWith("/search/") ? "Developer profile" : "Page not found")} · HackOverflow`;
+		const main = document.getElementById("main-content");
+		if (main) {
+			main.setAttribute("tabindex", "-1");
+			main.focus({ preventScroll: true });
+		}
+	}, [pathname]);
+	return null;
 }
 
-export default App
+function NotFound() {
+	return (
+		<div className="app-page">
+			<NavbarComponent />
+			<main id="main-content" className="workspace not-found">
+				<span className="state-icon">
+					<Icon name="search" size={24} />
+				</span>
+				<p className="eyebrow">404 · LOST IN THE CODE</p>
+				<h1>This page took a wrong turn.</h1>
+				<p>The link may have changed. Your workspace is still right here.</p>
+				<Link className="button button-primary" to="/dashboard">
+					Back to dashboard
+					<Icon name="arrowRight" size={16} />
+				</Link>
+			</main>
+			<Footer />
+		</div>
+	);
+}
+
+function App() {
+	return (
+		<BrowserRouter>
+			<RouteEffects />
+			<Routes>
+				<Route path="/dashboard" element={<Dashboard />}></Route>
+				<Route path="/leaderboard" element={<Leaderboard />}></Route>
+				<Route exact path="/" element={<Homepage />}></Route>
+				<Route path="/settings" element={<Setting />}></Route>
+				<Route path="/friends" element={<Friends />}></Route>
+				<Route
+					exact
+					path="/changepassword"
+					element={<ChangePassword />}
+				></Route>
+				<Route exact path="/register" element={<Landing />}></Route>
+				{/* <Route exact path='/about' element={<About />}></Route> */}
+				<Route
+					exact
+					path="/search/:username"
+					element={<SearchDashboard />}
+				></Route>
+				<Route path="*" element={<NotFound />} />
+			</Routes>
+			<ToastContainer
+				position="bottom-right"
+				theme="dark"
+				autoClose={4000}
+				closeOnClick
+				pauseOnFocusLoss={false}
+			/>
+		</BrowserRouter>
+	);
+}
+
+export default App;

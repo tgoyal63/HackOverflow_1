@@ -1,70 +1,86 @@
-import { useState, useEffect } from "react"
-import "./Login.scss"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAppContext } from "../../Context/appContext"
+import { Icon } from "../UI/Icon"
+import "./Login.scss"
 
-const initialState = {
-  username: "",
-  password: "",
-}
+const initialState = { username: "", password: "" }
 
-export const Login = (props) => {
+export const Login = ({ passLoginChildData }) => {
   const [values, setValues] = useState(initialState)
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
   const { token, loginUser } = useAppContext()
-  const handleChange = (e) => {
-    setValues({ ...values, [e.target.name]: e.target.value })
-  }
-
-  const onSubmit = async (e) => {
-    e.preventDefault()
-    if (isSubmitting) return
-    setIsSubmitting(true)
-    setError("")
-    const { username, password } = values
-    const currentUser = { username, password }
-    const succeeded = await loginUser(currentUser)
-    setIsSubmitting(false)
-    if (succeeded) props.passLoginChildData(true)
-    else setError("Unable to sign in. Check your username and password, then try again.")
-  }
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (token) navigate("/dashboard")
   }, [token, navigate])
 
+  const handleChange = (event) => {
+    setValues((current) => ({ ...current, [event.target.name]: event.target.value }))
+  }
+
+  const onSubmit = async (event) => {
+    event.preventDefault()
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    setError("")
+    const succeeded = await loginUser(values)
+    setIsSubmitting(false)
+    if (succeeded) passLoginChildData(true)
+    else setError("Unable to sign in. Check your username and password, then try again.")
+  }
+
   return (
-    <div className='loginBox text-center'>
-      <form onSubmit={onSubmit} aria-busy={isSubmitting}>
-        <div className='inputBox'>
+    <form aria-label='Sign in' className='auth-form login-form' onSubmit={onSubmit} aria-busy={isSubmitting}>
+      <div className='field'>
+        <label htmlFor='login-username'>Username</label>
+        <input
+          id='login-username'
+          className='field-input'
+          name='username'
+          autoComplete='username'
+          autoCapitalize='none'
+          spellCheck={false}
+          placeholder='Your HackOverflow username'
+          value={values.username}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className='field'>
+        <label htmlFor='login-password'>Password</label>
+        <div className='password-control'>
           <input
-            type='text'
-            name='username'
-            autoComplete='username'
-            aria-label='Username'
-            placeholder='Username'
-            value={values.username}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type='password'
+            id='login-password'
+            className='field-input'
+            type={showPassword ? "text" : "password"}
             name='password'
             autoComplete='current-password'
-            aria-label='Password'
-            placeholder='Password'
+            placeholder='Enter your password'
             value={values.password}
             onChange={handleChange}
             required
           />
+          <button
+            type='button'
+            className='password-toggle'
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((visible) => !visible)}
+          >
+            <Icon name={showPassword ? "eyeOff" : "eye"} size={18} />
+          </button>
         </div>
-        {error && <p role='alert' style={{ color: "#ff9999" }}>{error}</p>}
-        <button disabled={isSubmitting} className=' loginbtn' type='submit'>
-          SIGNIN
-        </button>
-      </form>
-    </div>
+      </div>
+      {error && <p className='form-error' role='alert'>{error}</p>}
+      <button className='button button-primary auth-submit' type='submit' disabled={isSubmitting}>
+        {isSubmitting ? "Signing in…" : "Sign in"}
+        {!isSubmitting && <Icon name='arrowRight' size={18} />}
+      </button>
+      <p className='field-hint auth-privacy'>Your coding profiles stay connected to one account.</p>
+    </form>
   )
 }

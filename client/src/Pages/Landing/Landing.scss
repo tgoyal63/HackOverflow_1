@@ -1,53 +1,44 @@
-.landing-home{
-  background: #121217;
+.auth-page {
+  .auth-workspace { margin-left: 0; width: 100%; max-width: none; padding-top: 44px; padding-bottom: 56px; }
+  .auth-layout { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(32px, 5vw, 76px); align-items: start; max-width: 1080px; margin: 0 auto; }
+  .auth-introduction { padding-top: 64px; min-width: 0; }
+  .auth-introduction h1 { margin: 18px 0 24px; color: var(--text, #f4f5f7); font-size: clamp(2.3rem, 4.2vw, 4rem); letter-spacing: -0.055em; font-weight: 750; line-height: 1.08; }
+  .auth-introduction > p { max-width: 35ch; margin: 0; color: var(--muted, #a3aab9); line-height: 1.8; font-size: 1rem; }
+  .auth-platform-list { list-style: none; padding: 0; margin-bottom: 0; display: flex; flex-wrap: wrap; gap: 14px 18px; margin-top: 28px; }
+  .auth-platform-list > li { display: inline-flex; align-items: center; gap: 7px; color: var(--text, #f4f5f7); font-size: 0.8rem; }
+  .auth-note { display: flex; gap: 14px; margin-top: 64px; border-top: 1px solid var(--border, #2d313b); padding-top: 28px; max-width: 380px; }
+  .auth-note-icon { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; color: var(--accent, #ff7972); background: var(--raised, #20232b); border: 1px solid var(--border, #2d313b); border-radius: 12px; }
+  .auth-note strong { color: var(--text, #f4f5f7); font-size: 0.875rem; font-weight: 600; }
+  .auth-note p { margin: 7px 0 0; font-size: 0.8rem; line-height: 1.7; color: var(--muted, #a3aab9); }
+  .auth-panel { padding: clamp(22px, 3vw, 36px); min-width: 0; }
+  .auth-panel-heading h2 { margin: 10px 0 10px; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.035em; }
+  .auth-panel-heading > p { line-height: 1.7; margin-bottom: 24px; }
+  .auth-mode-switch { display: flex; padding: 4px; background: var(--background, #101115); border: 1px solid var(--border, #2d313b); border-radius: 10px; margin-bottom: 26px; }
+  .auth-mode-switch > legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; padding: 0; margin: -1px; border: 0; }
+  .auth-mode-switch > button { min-width: 0; flex: 1; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 7px; background: transparent; color: var(--muted, #a3aab9); font-size: 0.875rem; font-weight: 600; }
+  .auth-mode-switch > .selected { color: var(--text, #f4f5f7); background: var(--raised, #20232b); box-shadow: 0 1px 3px #0003; }
+  .auth-mode-switch > button:focus-visible { outline: 2px solid var(--accent, #ff7972); outline-offset: 2px; }
+  .auth-switch-copy { margin: 24px 0 0; text-align: center; font-size: 0.8rem; color: var(--muted, #a3aab9); }
+  .auth-switch-copy button { padding: 6px 2px; min-height: 44px; border: 0; background: transparent; color: var(--accent, #ff7972); font-weight: 600; }
+  .auth-switch-copy button:focus-visible { outline: 2px solid var(--accent, #ff7972); outline-offset: 3px; border-radius: 3px; }
 }
 
-
-.landing {
-  margin: 0;
-  padding: 0;
-  height: 102vh;
-  background: #121217;
+@media (max-width: 960px) {
+  .auth-page {
+    .auth-layout { grid-template-columns: minmax(0, 1fr); gap: 28px; max-width: 620px; }
+    .auth-introduction { padding-top: 0; }
+    .auth-introduction h1 { font-size: 2.7rem; margin-bottom: 18px; }
+    .auth-introduction > p { max-width: 48ch; }
+    .auth-platform-list { margin-top: 20px; }
+    .auth-note { display: none; }
+  }
 }
 
-
-.loginBoxabc {
-  box-shadow: 0 4px 20px rgb(0 0 0 / 0.5);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 350px;
-  min-height: 150px;
-  background-color: #17171F;
-  border-radius: 10px;
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-.userabc {
-  margin: 0 auto;
-  display: block;
-  margin-bottom: 20px;
-}
-
-.loginBoxabc h3 {
-  margin: 0;
-  padding: 0 0 20px;
-  color: #FF6666 !important;
-  text-align: center;
-}
-
-.loginBoxabc .toggleText {
-  margin-left: 0;
-  background: transparent;
-  border: none;
-  align-self: center;
-  outline: none;
-  font-size: 15px;
-  color: #fff;
-  border-radius: 20px;
-  cursor: pointer;
-  width: 100%;
-  margin-bottom: 20px;
+@media (max-width: 480px) {
+  .auth-page {
+    .auth-workspace { padding-top: 26px; }
+    .auth-introduction h1 { font-size: 2.25rem; }
+    .auth-panel { padding: 20px; }
+    .auth-panel-heading h2 { font-size: 1.55rem; }
+  }
 }

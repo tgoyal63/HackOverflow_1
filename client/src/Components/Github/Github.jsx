@@ -1,78 +1,36 @@
 import { useEffect } from "react"
-import "./Github.scss"
 import { useAppContext } from "../../Context/appContext"
-import { Container, Row, Col, Card } from "react-bootstrap"
+import { ExternalCharts, Metric, PlatformPanel, hasValue } from "./PlatformParts"
 
-const Github = (props) => {
-  const { username } = props;
-  const {
-    getGithub,
-    graph,
-    stats,
-    mul,
-    contributions,
-    githubUsername,
-    public_repos,
-    public_gists,
-    followers,
-    following,
-    organizations,
-    github_created_at,
-  } = useAppContext()
+const Github = ({ username }) => {
+  const context = useAppContext()
+  const { getGithub, graph, stats, mul, contributions, githubUsername,
+    public_repos, public_gists, followers, following, organizations, github_created_at } = context
   useEffect(() => {
     if (typeof username === "string") getGithub(username)
   }, [getGithub, username])
+  const hasData = [public_repos, public_gists, followers, following, organizations].some(hasValue)
+
   return (
-    <div className='github'>
-      <Container>
-        <div className='header'>
-          <h3 className='heading'>GitHub</h3>
-          {/* <img src={require("../../assets/GitHub-Mark-Light-32px.png")}  alt="github" /> */}
-          <h6>
-            username: <span className='username'>{githubUsername}</span>
-          </h6>
-        </div>
-        <Row>
-          <Col lg={12} className='githubStats'>
-            <img src={graph} alt="GitHub activity graph" width='100%' />
-          </Col>
-        </Row>
-        <Row>
-          <Col lg={6} className='githubStats'>
-            <img src={stats} alt="GitHub statistics" width='100%' />
-          </Col>
-          <Col lg={6} className='githubStats'>
-            <img src={contributions} alt="GitHub contributions" width='100%' />
-          </Col>
-        </Row>
-        <Row>
-          <Col lg={6} className='githubStats'>
-            <img src={mul} alt="GitHub language statistics" width='100%' />
-          </Col>
-          <Col lg={6} className='githubStats'>
-            <Card className='g-card'>
-              <Card.Body>
-                <Card.Title>GitHub Data</Card.Title>
-                <Card.Text as="div">
-                  <Row>
-                    <Col lg={6}>Public Repos: {public_repos}</Col>
-                    <Col lg={6}>Followers: {followers}</Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>Public Gists: {public_gists}</Col>
-                    <Col lg={6}>Following: {following}</Col>
-                  </Row>
-                  <Row>
-                    <Col lg={6}>Created: {github_created_at}</Col>
-                    <Col lg={6}>Organizations: {organizations}</Col>
-                  </Row>
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+    <PlatformPanel platform="github" title="GitHub" eyebrow="Code & collaboration" username={username}
+      handle={githubUsername} resource={context.resources?.github} hasData={hasData}
+      href={`https://github.com/${encodeURIComponent(githubUsername || username || "")}`}
+      onRetry={() => getGithub(username)}>
+      <dl className="platform-metrics">
+        <Metric label="Public repositories" value={public_repos} featured />
+        <Metric label="Followers" value={followers} featured />
+        <Metric label="Following" value={following} />
+        <Metric label="Public gists" value={public_gists} />
+        <Metric label="Organizations" value={organizations} />
+        <Metric label="Joined GitHub" value={github_created_at} />
+      </dl>
+      <ExternalCharts charts={[
+        { label: "GitHub activity graph", src: graph },
+        { label: "GitHub profile statistics", src: stats },
+        { label: "GitHub contribution streak", src: contributions },
+        { label: "GitHub language statistics", src: mul },
+      ]} />
+    </PlatformPanel>
   )
 }
 

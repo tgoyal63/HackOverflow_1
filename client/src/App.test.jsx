@@ -37,6 +37,12 @@ function renderRoute(path) {
   return render(<App />)
 }
 
+function getSubmit(label) {
+  const forms = { SIGNUP: ["Create account", "Create account"], SIGNIN: ["Sign in", "Sign in"], Submit: ["Change password", "Update password"] }
+  const [form, button] = forms[label]
+  return within(screen.getByRole("form", { name: form })).getByRole("button", { name: button })
+}
+
 function deferred() {
   let resolve
   const promise = new Promise((complete) => { resolve = complete })
@@ -46,12 +52,12 @@ function deferred() {
 test("public home links to registration, whose login toggle is keyboard-accessible", () => {
   context.token = null
   renderRoute("/")
-  const register = screen.getByRole("link", { name: "Register" })
+  const register = screen.getByRole("link", { name: "Create your account" })
   expect(register).toHaveAttribute("href", "/register")
   fireEvent.click(register)
-  expect(screen.getByRole("button", { name: "SIGNUP" })).toBeInTheDocument()
-  fireEvent.click(screen.getByRole("button", { name: "Already have an account? Login" }))
-  expect(screen.getByRole("button", { name: "SIGNIN" })).toBeInTheDocument()
+  expect(getSubmit("SIGNUP")).toBeInTheDocument()
+  fireEvent.click(within(screen.getByRole("group", { name: "Account access" })).getByRole("button", { name: "Sign in" }))
+  expect(getSubmit("SIGNIN")).toBeInTheDocument()
   expect(context.getUser).not.toHaveBeenCalled()
 })
 
@@ -63,7 +69,8 @@ test("dashboard fetches each provider once and unmounts cleanly", () => {
   rerender(<App />)
   expect(context.getUser).toHaveBeenCalledTimes(1)
   expect(context.getGithub).toHaveBeenCalledWith("")
-  expect(screen.getByAltText("GitHub activity graph")).toBeInTheDocument()
+  expect(screen.getByRole("heading", { name: "GitHub", level: 2 })).toBeInTheDocument()
+  expect(screen.queryByAltText("GitHub activity graph")).not.toBeInTheDocument()
   expect(() => unmount()).not.toThrow()
 })
 
@@ -71,15 +78,15 @@ test("protected navigation redirects signed-out visitors to the home page", asyn
   context.token = null
   renderRoute("/friends")
   await waitFor(() => expect(window.location.pathname).toBe("/"))
-  expect(screen.getByRole("link", { name: "Register" })).toBeInTheDocument()
+  expect(screen.getByRole("link", { name: "Create your account" })).toBeInTheDocument()
 })
 
 test("search ignores blank usernames and safely encodes a nonblank route value", async () => {
   renderRoute("/dashboard")
-  fireEvent.change(screen.getByRole("textbox", { name: "Search username" }), { target: { value: "   " } })
+  fireEvent.change(screen.getByRole("searchbox", { name: "Search username" }), { target: { value: "   " } })
   fireEvent.click(screen.getByRole("button", { name: "Search" }))
   expect(window.location.pathname).toBe("/dashboard")
-  fireEvent.change(screen.getByRole("textbox", { name: "Search username" }), { target: { value: " bob/name " } })
+  fireEvent.change(screen.getByRole("searchbox", { name: "Search username" }), { target: { value: " bob/name " } })
   fireEvent.click(screen.getByRole("button", { name: "Search" }))
   await waitFor(() => expect(context.searchUser).toHaveBeenCalledWith("bob/name"))
   expect(window.location.pathname).toBe("/search/bob%2Fname")
@@ -129,7 +136,7 @@ test("a pending vote cannot reload the previous profile after navigating to anot
   context.getUpVote.mockReturnValue(vote.promise)
   renderRoute("/search/bob")
   fireEvent.click(screen.getByRole("button", { name: "Upvote" }))
-  fireEvent.change(screen.getByRole("textbox", { name: "Search username" }), { target: { value: "carol" } })
+  fireEvent.change(screen.getByRole("searchbox", { name: "Search username" }), { target: { value: "carol" } })
   fireEvent.click(screen.getByRole("button", { name: "Search" }))
   await waitFor(() => expect(context.searchUser).toHaveBeenLastCalledWith("carol"))
   const callsAfterNavigation = context.searchUser.mock.calls.length
@@ -144,6 +151,8 @@ test("friends refresh after deletion succeeds, never before", async () => {
   renderRoute("/friends")
   expect(context.getFriendsReq).toHaveBeenCalledTimes(1)
   fireEvent.click(screen.getByRole("button", { name: "Remove bob" }))
+  expect(context.getCancelReq).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole("button", { name: "Confirm remove bob" }))
   expect(context.getFriendsReq).toHaveBeenCalledTimes(1)
   await act(async () => deletion.resolve(true))
   for (const method of ["getPendingReq", "getFriendsReq", "getRequestsReq"]) {
@@ -155,26 +164,26 @@ test("settings prefill current socials and refresh only after a successful save"
   const save = deferred()
   context.editSocials.mockReturnValue(save.promise)
   renderRoute("/settings")
-  fireEvent.click(screen.getByRole("button", { name: "Edit" }))
+  fireEvent.click(screen.getByRole("button", { name: "Edit profiles" }))
   expect(screen.getByRole("textbox", { name: "GitHub username" })).toHaveValue("alice-gh")
   expect(screen.getByRole("textbox", { name: "HackerRank username" })).toHaveValue("alice-hr")
   fireEvent.change(screen.getByRole("textbox", { name: "GitHub username" }), { target: { value: "alice-updated" } })
-  fireEvent.click(screen.getByRole("button", { name: "Save" }))
+  fireEvent.click(screen.getByRole("button", { name: "Save changes" }))
   expect(context.editSocials).toHaveBeenCalledWith({ socials: { github: "alice-updated", hackerrank: "alice-hr", codechef: "alice-cc" } })
   expect(context.getUser).toHaveBeenCalledTimes(1)
   expect(toast).not.toHaveBeenCalled()
   await act(async () => save.resolve(true))
   expect(context.getUser).toHaveBeenCalledTimes(2)
-  expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument()
-  expect(toast).toHaveBeenCalledWith("Socials Changed Successfully")
+  expect(screen.getByRole("button", { name: "Edit profiles" })).toBeInTheDocument()
+  expect(toast).toHaveBeenCalledWith("Coding profiles saved.")
 })
 
 test("failed settings save preserves the edit form without a success toast", async () => {
   context.editSocials.mockResolvedValue(false)
   renderRoute("/settings")
-  fireEvent.click(screen.getByRole("button", { name: "Edit" }))
-  fireEvent.click(screen.getByRole("button", { name: "Save" }))
-  await waitFor(() => expect(toast).toHaveBeenCalledWith("Unable to change socials"))
+  fireEvent.click(screen.getByRole("button", { name: "Edit profiles" }))
+  fireEvent.click(screen.getByRole("button", { name: "Save changes" }))
+  await waitFor(() => expect(toast).toHaveBeenCalledWith("We couldn’t save your coding profiles."))
   expect(screen.getByRole("textbox", { name: "GitHub username" })).toHaveValue("alice-gh")
   expect(context.getUser).toHaveBeenCalledTimes(1)
 })
@@ -194,7 +203,7 @@ test.each([
       fireEvent.change(screen.getByRole("textbox", { name, exact: true }), { target: { value } })
     }
   }
-  const form = screen.getByRole("button", { name: label }).closest("form")
+  const form = getSubmit(label).closest("form")
   await act(async () => fireEvent.submit(form))
   expect(success).not.toHaveBeenCalled()
   await act(async () => fireEvent.submit(form))
@@ -210,7 +219,7 @@ test.each([
   context[method].mockReturnValue(request.promise)
   renderRoute("/register")
   if (kind === "login") {
-    fireEvent.click(screen.getByRole("button", { name: "Already have an account? Login" }))
+    fireEvent.click(within(screen.getByRole("group", { name: "Account access" })).getByRole("button", { name: "Sign in" }))
   } else {
     for (const [name, value] of [["Name", "Alice"], ["Email", "alice@example.test"], ["GitHub username", "alice-gh"], ["HackerRank username", "alice-hr"], ["CodeChef username", "alice-cc"]]) {
       fireEvent.change(screen.getByRole("textbox", { name, exact: true }), { target: { value } })
@@ -218,7 +227,7 @@ test.each([
   }
   fireEvent.change(screen.getByRole("textbox", { name: "Username", exact: true }), { target: { value: "alice" } })
   fireEvent.change(screen.getByLabelText("Password", { exact: true }), { target: { value: "test-password" } })
-  const submit = screen.getByRole("button", { name: label })
+  const submit = getSubmit(label)
   fireEvent.click(submit)
   expect(submit).toBeDisabled()
   fireEvent.submit(submit.closest("form"))
@@ -240,8 +249,8 @@ test("password results use the completed request rather than stale context error
   for (const label of ["Current Password", "New Password", "Confirm Password"]) {
     fireEvent.change(screen.getByLabelText(label), { target: { value: "test-password" } })
   }
-  fireEvent.click(screen.getByRole("button", { name: "Submit" }))
-  await waitFor(() => expect(toast).toHaveBeenCalledWith("Password Changed Successfully"))
+  fireEvent.click(getSubmit("Submit"))
+  await waitFor(() => expect(toast).toHaveBeenCalledWith("Password updated."))
   expect(context.changePassword).toHaveBeenCalledWith({ currentPassword: "test-password", newPassword: "test-password" })
   expect(screen.getByLabelText("Current Password")).toHaveValue("")
 })
@@ -252,9 +261,9 @@ test("failed password change keeps input and reports failure without claiming su
   for (const label of ["Current Password", "New Password", "Confirm Password"]) {
     fireEvent.change(screen.getByLabelText(label), { target: { value: "test-password" } })
   }
-  fireEvent.click(screen.getByRole("button", { name: "Submit" }))
-  await waitFor(() => expect(toast).toHaveBeenCalledWith("Unable to change password"))
-  expect(toast).not.toHaveBeenCalledWith("Password Changed Successfully")
+  fireEvent.click(getSubmit("Submit"))
+  await waitFor(() => expect(toast).toHaveBeenCalledWith("We couldn’t update your password."))
+  expect(toast).not.toHaveBeenCalledWith("Password updated.")
   expect(screen.getByLabelText("Current Password")).toHaveValue("test-password")
 })
 
@@ -262,9 +271,9 @@ test("mismatched password confirmation does not call the API", () => {
   renderRoute("/changepassword")
   fireEvent.change(screen.getByLabelText("New Password"), { target: { value: "new-password" } })
   fireEvent.change(screen.getByLabelText("Confirm Password"), { target: { value: "different-password" } })
-  fireEvent.submit(screen.getByRole("button", { name: "Submit" }).closest("form"))
+  fireEvent.submit(getSubmit("Submit").closest("form"))
   expect(context.changePassword).not.toHaveBeenCalled()
-  expect(toast).not.toHaveBeenCalledWith("Password Changed Successfully")
+  expect(toast).not.toHaveBeenCalledWith("Password updated.")
 })
 
 test("leaderboard renders valid linked rows and ranks for both views", () => {
