@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useAppContext } from "../../Context/appContext"
 import "./ChangePassword.scss"
 import { useNavigate } from "react-router-dom"
@@ -14,15 +14,11 @@ const initialState = {
 
 const ChangePassword = () => {
   const [values, setValues] = useState(initialState)
-  const { token, changePassword, isError } = useAppContext()
+  const { token, changePassword } = useAppContext()
   const navigate = useNavigate()
 
   useEffect(() => {
-    setTimeout(() => {
-      if (!token) {
-        navigate("/")
-      }
-    }, 2000)
+    if (!token) navigate("/")
   }, [token, navigate])
 
   const handleChange = (e) => {
@@ -37,14 +33,13 @@ const ChangePassword = () => {
     if (newPassword !== confirmPassword) {
       toast("Password didn't matched")
     } else {
-      await changePassword(pwdata)
-      setTimeout(() => {
-        if (isError) {
-          toast("Invalid Password")
-        } else {
-          toast("Password Changed Successfully")
-        }
-      }, 600)
+      const succeeded = await changePassword(pwdata)
+      if (succeeded) {
+        setValues(initialState)
+        toast("Password Changed Successfully")
+      } else {
+        toast("Unable to change password")
+      }
     }
   }
   return (
@@ -52,6 +47,7 @@ const ChangePassword = () => {
       <NavbarComponent />
       <div className='loginBoxabc-cp'>
         <img
+          alt=''
           className='userabc-cp'
           src='https://cdn1.iconfinder.com/data/icons/avatars-55/100/avatar_profile_user_music_headphones_shirt_cool-512.png'
           height='100px'
@@ -64,6 +60,8 @@ const ChangePassword = () => {
               <input
                 type='password'
                 name='currentPassword'
+                aria-label='Current Password'
+                autoComplete='current-password'
                 placeholder='Current Password'
                 value={values.currentPassword}
                 onChange={handleChange}
@@ -72,6 +70,8 @@ const ChangePassword = () => {
               <input
                 type='password'
                 name='newPassword'
+                aria-label='New Password'
+                autoComplete='new-password'
                 placeholder='New Password'
                 value={values.newPassword}
                 onChange={handleChange}
@@ -80,6 +80,8 @@ const ChangePassword = () => {
               <input
                 type='password'
                 name='confirmPassword'
+                aria-label='Confirm Password'
+                autoComplete='new-password'
                 placeholder='Confirm Password'
                 required
                 value={values.confirmPassword}

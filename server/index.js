@@ -1,37 +1,18 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const dbConn = require('./utils/db-conn.utils.js');
-const userRoutes = require('./routes/user.routes.js');
-const dataRoutes = require('./routes/data.routes.js');
-const friendRoutes = require('./routes/friend.routes.js');
-const voteRoutes = require('./routes/vote.routes.js');
-const leaderboardRoutes = require('./routes/leaderboard.routes.js');
+const { createApp } = require('./app.js');
+const { start } = require('./startup.js');
 
-const app = express();
-const port = parseInt(process.env.APP_PORT, 10) || 8082;
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({
-  extended: true,
-}));
+const app = createApp();
 
-/**
- * App Routes
- */
-app.get('/', (req, res) => {
-  res.send('Welcome to the Social Coding Experience Portal.');
-});
+if (require.main === module) {
+  start(app).then((server) => {
+    console.log(`Webservice listening on port: ${server.address().port}`);
+  }).catch(() => {
+    // Driver errors can include connection strings and credentials.
+    console.error('Backend startup failed. Check database configuration, connectivity, and port availability.');
+    process.exit(1);
+  });
+}
 
-app.use('/', userRoutes);
-app.use('/', dataRoutes);
-app.use('/', friendRoutes);
-app.use('/', voteRoutes);
-app.use('/', leaderboardRoutes);
-
-/**
- * To make sure, app start only if database is found
- */
-dbConn.safeConnect().then(
-  () => app.listen(port, () => console.log(`Webservice listening on port: ${port}`)),
-);
+// Vercel imports the request handler rather than starting a listening server.
+module.exports = app;

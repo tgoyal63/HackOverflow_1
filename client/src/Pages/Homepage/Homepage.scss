@@ -4,7 +4,7 @@
 }
 
 
-#home{
+.home-section{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -76,4 +76,25 @@
     font-size: 24px;
     color: #FF6666;
     font-weight: 600;
+}
+.register-link {
+    margin-top: 25px;
+    padding: 8px 22px;
+    border: 0;
+    border-radius: 4px;
+    background: #ff6666;
+    color: #fff;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.75;
+    letter-spacing: 0.02857em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.register-link:hover,
+.register-link:focus-visible {
+    background: #ff6666;
+    color: #fff;
 }

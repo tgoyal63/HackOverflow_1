@@ -1,7 +1,13 @@
 # HackOverflow_1
 
+# Development and validation
+
+Use Node.js 22 (see `.node-version`). See [frontend commands and Render settings](client/README.md) and [backend commands, environment, and database acceptance](server/README.md). GitHub Actions runs both packages' audit and regression gates.
+
 # Links
-Frontend Link - https://hackoverflow-kappa.vercel.app
+Active Render frontend - https://hackoverflow-esh6.onrender.com
+
+Existing Vercel frontend - https://hackoverflow-kappa.vercel.app
 
 Backend APIs Link - https://hackoverflow-backend.vercel.app
 

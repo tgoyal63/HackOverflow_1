@@ -18,7 +18,7 @@ module.exports = {
   searchByEntity: serviceBoilerPlate(async (entity, entityValue) => {
     const query = {};
     if (entity === '_id') {
-      query._id = ObjectId(entityValue);
+      query._id = new ObjectId(entityValue);
     } else if (entity === 'username') {
       query.username = entityValue;
       // } else if (entity === 'phone') {
@@ -29,13 +29,15 @@ module.exports = {
       throw new ServiceError(403, 'Invalid Search');
     }
     const data = await user.aggregate([{
+      $match: query
+    }, {
       $lookup: {
         from: friend.collection.name,
         localField: "friends",
         foreignField: "_id",
         as: "friends",
         let: { friends: "$friends" },
-        pipeline: [{ $project: { status: 1, _id: 0 } }]
+        pipeline: [{ $project: { status: 1, recipient: 1, _id: 0 } }]
       }
     }, {
       $lookup: {
@@ -48,15 +50,13 @@ module.exports = {
           $project: { status: 1, _id: 0, voter: 1 },
         }]
       },
-    }, {
-      $match: query
     }]).exec();
     return data[0];
   }),
 
   // Updating a user by its id in database
   updateById: serviceBoilerPlate(async (_id, body) => {
-    const data = await user.findOneAndUpdate({ _id }, body, { new: true }).exec();
+    const data = await user.findOneAndUpdate({ _id }, body, { new: true, runValidators: true }).exec();
     return data;
   }),
 
@@ -67,6 +67,8 @@ module.exports = {
 
   getFriendsData: serviceBoilerPlate(async (_id, status) => {
     const data = await user.aggregate([{
+      $match: { _id }
+    }, {
       $lookup: {
         from: friend.collection.name,
         localField: "friends",
@@ -79,8 +81,6 @@ module.exports = {
           $project: { recipient: 1, _id: 0 }
         }],
       }
-    }, {
-      $match: { _id }
     }, {
       $project: { username: 1, friends: 1, _id: 0 }
     }, {
@@ -100,6 +100,8 @@ module.exports = {
 
   getVotesData: serviceBoilerPlate(async (_id, status) => {
     const data = await user.aggregate([{
+      $match: { _id }
+    }, {
       $lookup: {
         from: vote.collection.name,
         localField: "votes",
@@ -112,8 +114,6 @@ module.exports = {
           $project: { voter: 1, _id: 0 }
         }],
       }
-    }, {
-      $match: { _id }
     }, {
       $project: { username: 1, votes: 1, _id: 0 }
     }, {
@@ -128,6 +128,6 @@ module.exports = {
         }],
       }
     }]).exec();
-    return data[0].votes;
+    return data[0]?.votes || [];
   })
 };

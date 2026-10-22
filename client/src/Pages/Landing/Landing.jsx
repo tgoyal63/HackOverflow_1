@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Login } from "../../Components/Login/Login"
 import { Signup } from "../../Components/Signup/Signup"
 import "./Landing.scss"
@@ -32,7 +32,7 @@ const Landing = () => {
               src='https://cdn1.iconfinder.com/data/icons/avatars-55/100/avatar_profile_user_music_headphones_shirt_cool-512.png'
               height='100px'
               width='100px'
-              alt='landing-image'
+              alt=''
             />
             <h3> {!isSignUp ? "LOGIN" : "SIGN-UP"}</h3>
             {isSignUp ? (
@@ -40,14 +40,15 @@ const Landing = () => {
             ) : (
               <Login passLoginChildData={setIsLoginUser} />
             )}
-            <div
+            <button
+              type='button'
               className='toggleText'
               onClick={() => setIsSignUp((cur) => !cur)}
             >
               {isSignUp
                 ? "Already have an account? Login"
                 : "Don't have an account? Sign up"}
-            </div>
+            </button>
           </div>
         </div>
       </div>

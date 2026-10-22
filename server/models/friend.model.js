@@ -5,7 +5,7 @@ const friend = new Schema({
   recipient: { type: Schema.Types.ObjectId, ref: 'users' },
   status: {
     type: Number,
-    enums: [
+    enum: [
       0,    //'add friend', -> rejected
       1,    //'requested',
       2,    //'pending',
@@ -21,4 +21,3 @@ module.exports = {
 };
 
 // addFriend: create
-// 

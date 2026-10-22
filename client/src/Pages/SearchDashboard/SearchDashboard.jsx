@@ -1,7 +1,7 @@
-import React, { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import "./SearchDashboard.scss"
 import NavbarComponent from "../../Components/Navbar/NavbarComponent"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { Footer } from "../../Components/Footer/Footer.jsx"
 import { useAppContext } from "../../Context/appContext"
 import "react-toastify/dist/ReactToastify.css"
@@ -29,48 +29,50 @@ const SearchDashboard = () => {
     loginUsername
   } = useAppContext()
 
-  const location = useLocation()
-  const navigate = useNavigate();
-
-  const username = location.pathname.split("/")[2]
+  const { username } = useParams()
+  const navigate = useNavigate()
+  const currentUsername = useRef(username)
   useEffect(() => {
-    const user = async () => {
-      if (username.toString() === loginUsername.toString()) {
-        navigate("/dashboard")
-      }
-      if (username) await searchUser(username)
+    currentUsername.current = username
+    if (username === loginUsername) {
+      navigate("/dashboard")
+      return
     }
-    user()
-  }, [username, status, voteStatus])
+    if (username) searchUser(username)
+    return () => { currentUsername.current = undefined }
+  }, [username, loginUsername, navigate, searchUser])
 
-  function handleFriend(username) {
+  async function handleFriend(username) {
+    let succeeded
+    let message
     if (status === "Add Friend") {
-      addFriend(username)
-      toast("Friend request sent!")
+      succeeded = await addFriend(username)
+      message = "Friend request sent!"
     } else if (status === "Accept Request") {
-      acceptReq(username)
-      toast("You are now friends!")
+      succeeded = await acceptReq(username)
+      message = "You are now friends!"
     } else {
-      if (status === "Remove Friend") toast("Friend Removed")
-      else toast("Friend Request Removed!")
-      getCancelReq(username)
+      succeeded = await getCancelReq(username)
+      message = status === "Remove Friend" ? "Friend Removed" : "Friend Request Removed!"
+    }
+    if (succeeded && currentUsername.current === username) {
+      await searchUser(username)
+      toast(message)
     }
   }
 
   const handleUpVote = async () => {
-    if (voteStatus === "upvoted") {
-      await removeVote(username)
-    } else {
-      await getUpVote(username)
-    }
+    const succeeded = voteStatus === "upvoted"
+      ? await removeVote(username)
+      : await getUpVote(username)
+    if (succeeded && currentUsername.current === username) await searchUser(username)
   }
 
   const handleDownVote = async () => {
-    if (voteStatus === "downvoted") {
-      await removeVote(username)
-    } else {
-      await getDownVote(username)
-    }
+    const succeeded = voteStatus === "downvoted"
+      ? await removeVote(username)
+      : await getDownVote(username)
+    if (succeeded && currentUsername.current === username) await searchUser(username)
   }
 
   return (
@@ -90,7 +92,11 @@ const SearchDashboard = () => {
             <div className='col-lg-12 col-sm-6 text-center d-flex justify-content-center gap-4'>
               <button
                 className='btn btn-up p-3'
+                type='button'
+                disabled={!status}
                 title='Upvote'
+                aria-label='Upvote'
+                aria-pressed={voteStatus === 'upvoted'}
                 onClick={handleUpVote}
               >
                 <div className='d-flex justify-content-center p-0 m-0'>
@@ -100,7 +106,11 @@ const SearchDashboard = () => {
               </button>
               <button
                 className='btn btn-down  p-3'
+                type='button'
+                disabled={!status}
                 title='Downvote'
+                aria-label='Downvote'
+                aria-pressed={voteStatus === 'downvoted'}
                 onClick={handleDownVote}
               >
                 <div className='d-flex justify-content-center p-0 m-0'>
@@ -110,7 +120,9 @@ const SearchDashboard = () => {
               </button>
               <button
                 className='btn btn-add  p-3'
+                disabled={!status}
                 title={status}
+                aria-label={status || "Friend request"}
                 type='button'
                 onClick={(event) => {
                   event.preventDefault()
@@ -126,9 +138,9 @@ const SearchDashboard = () => {
             </div>
           </div>
         </div>
-        <Github username={socials && socials.github} />
-        <Hackerrank username={socials && socials.hackerrank} />
-        <CodeChef username={socials && socials.codechef} />
+        <Github username={socials?.github} />
+        <Hackerrank username={socials?.hackerrank} />
+        <CodeChef username={socials?.codechef} />
 
         {/* {isGithubError ? <ToastContainer /> : <></>} */}
         <Footer />

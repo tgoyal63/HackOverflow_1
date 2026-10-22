@@ -1,7 +1,7 @@
 // Importing File Dependencies
 const { controllerBoilerPlate, controllerResponse } = require('../utils/controller.utils.js');
 const userService = require('../services/user.service.js');
-const { checkExist, signToken, hashPassword, validateUser, checkPassword } = require('../utils/user.utils.js');
+const { checkExist, signToken, hashPassword, validateUser, checkPassword, getSigningKey } = require('../utils/user.utils.js');
 const ControllerError = require('../errors/controller.error.js');
 const { checkAllSocials } = require('../utils/common.utils.js');
 
@@ -9,6 +9,7 @@ module.exports = {
 
   // Creating User
   createUser: ('/signup', controllerBoilerPlate(async (req) => {
+    getSigningKey();
     // Checking if user social handles are valid or not
     const check = await checkAllSocials(req.body.socials);
     if (check.status === 404)
@@ -18,7 +19,7 @@ module.exports = {
     // Creating User
     let data = await userService.create(req.body);
     // Creating JWT Token for user
-    token = signToken(data._id);
+    const token = signToken(data._id);
     // Updating token in database
     data = await userService.updateById(data._id, { token });
     return controllerResponse(201, 'Successful', { token });
@@ -88,8 +89,10 @@ module.exports = {
     }
 
     if (data) {
-      if (data.friends[0]) {
-        const status = data.friends[0].status;
+      const relationship = data.friends.find((friend) =>
+        String(friend.recipient) === String(req.user._id));
+      if (relationship) {
+        const status = relationship.status;
         if (status === 3) data.status = 'friends';
         else if (status === 2) data.status = 'requested';
         else if (status === 1) data.status = 'pending';
@@ -127,9 +130,9 @@ module.exports = {
     if (!isPasswordValid)
       throw new ControllerError(401, 'Invalid Password!');
     // Hashing password for securely storing in database
-    password = hashPassword(req.body.newPassword);
+    const password = hashPassword(req.body.newPassword);
     // Creating new JWT Token for user
-    token = signToken(req.user._id);
+    const token = signToken(req.user._id);
     const data = await userService.updateById(req.user._id, { password, token });
     return controllerResponse(201, 'Successful', { token });
   })),
@@ -140,6 +143,7 @@ module.exports = {
     if (type === "pending") status = 1;
     else if (type === "requests") status = 2;
     else if (type === "all") status = 3
+    else throw new ControllerError(400, 'Invalid friend list type!');
     const data = await userService.getFriendsData(req.user._id, status);
     data.friends = data.friends.map((friend) => friend.username);
     return controllerResponse(200, 'Successful', data);

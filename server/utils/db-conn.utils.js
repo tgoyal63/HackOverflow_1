@@ -1,31 +1,24 @@
 const mongoose = require('mongoose');
 
-const dbHost = process.env.DB_HOST || "localhost";
-// const dbPort = process.env.DB_PORT || 27017;
-const dbName = process.env.DB_NAME || "hackoverflow";
-const dbUser = process.env.DB_USER || "";
-const dbPass = process.env.DB_PASSWORD || "";
+// Preserve Mongoose 6's existing query-filter behavior explicitly.
+mongoose.set('strictQuery', true);
 
-const dbConn = {
-  connect: () => {
-    const url = `mongodb+srv://${dbUser}:${dbPass}@${dbHost}/${dbName}`;
-
-    // const url = "mongodb+srv://tushar:4O4m3y4anjLSwS7B@formcluster.70ocf.mongodb.net/hackoverflow";
-    return mongoose.connect(url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-  },
-  safeConnect: async () => {
-    try {
-      await dbConn.connect();
-      console.log(`Connected to database: ${dbName} at ${dbHost}`);
-    } catch (error) {
-      console.log('Connection to database failed. Error: ', error);
-      console.log('Closing application');
-      process.exit();
-    }
-  },
+const getConnectionUri = (env = process.env) => {
+  if (env.MONGODB_URI) return env.MONGODB_URI;
+  const dbHost = env.DB_HOST || 'localhost';
+  const dbName = encodeURIComponent(env.DB_NAME || 'hackoverflow');
+  const username = env.DB_USER || '';
+  const password = env.DB_PASSWORD || '';
+  if (Boolean(username) !== Boolean(password)) throw new Error('Incomplete database credentials.');
+  const credentials = username ? `${encodeURIComponent(username)}:${encodeURIComponent(password)}@` : '';
+  const local = ['localhost', '127.0.0.1', '[::1]'].includes(dbHost);
+  const port = local ? `:${env.DB_PORT || '27017'}` : '';
+  return `${local ? 'mongodb' : 'mongodb+srv'}://${credentials}${dbHost}${port}/${dbName}`;
 };
 
-module.exports = dbConn;
+const connect = () => mongoose.connect(getConnectionUri(), {
+  serverSelectionTimeoutMS: 10000,
+  maxPoolSize: 10,
+});
+
+module.exports = { connect, safeConnect: connect, getConnectionUri };

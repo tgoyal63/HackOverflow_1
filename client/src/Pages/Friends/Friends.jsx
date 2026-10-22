@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react"
+import { useCallback, useEffect } from "react"
 import NavbarComponent from "../../Components/Navbar/NavbarComponent"
 import { Footer } from "../../Components/Footer/Footer.jsx"
 import { Container } from "react-bootstrap"
 import "./Friends.scss"
 import { Tabs, Tab } from "react-bootstrap"
-import { Link } from "react-router-dom"
 import { useAppContext } from "../../Context/appContext"
 const Friends = () => {
   const {
@@ -18,22 +17,22 @@ const Friends = () => {
     acceptReq,
   } = useAppContext()
 
-  const [isCancel, setisCancel] = useState(false)
+  const refreshFriends = useCallback(() => Promise.all([
+    getPendingReq(),
+    getFriendsReq(),
+    getRequestsReq(),
+  ]), [getPendingReq, getFriendsReq, getRequestsReq])
 
-  useEffect(async () => {
-    await getPendingReq()
-    await getFriendsReq()
-    await getRequestsReq()
-  }, [isCancel])
+  useEffect(() => {
+    refreshFriends()
+  }, [refreshFriends])
 
-  function handleCancel(friend) {
-    getCancelReq(friend)
-    setisCancel(!isCancel)
+  async function handleCancel(friend) {
+    if (await getCancelReq(friend)) await refreshFriends()
   }
 
-  function handleAccept(friend) {
-    acceptReq(friend)
-    setisCancel(!isCancel)
+  async function handleAccept(friend) {
+    if (await acceptReq(friend)) await refreshFriends()
   }
 
   return (
@@ -51,9 +50,6 @@ const Friends = () => {
         >
           <div className='schedule'>
             <h1>Friends</h1>
-            <div className='context'>
-              <Link to='/connect'></Link>
-            </div>
             <Tabs
               defaultActiveKey='Friends'
               id='uncontrolled-tab-example'
@@ -66,13 +62,13 @@ const Friends = () => {
                       <td>Name</td>
                       <td style={{ width: "30%" }}> Remove </td>
                     </tr>
-                    {friends &&
-                      friends.map((friend) => (
-                        <tr>
+                    {friends?.map((friend) => (
+                        <tr key={friend}>
                           <td> {friend}</td>
                           <td style={{ width: "30%" }}>
                             <button
                               type='button'
+                              aria-label={`Remove ${friend}`}
                               className='btn'
                               onClick={(event) => {
                                 event.preventDefault()
@@ -95,13 +91,13 @@ const Friends = () => {
                       <td>Name</td>
                       <td style={{ width: "30%" }}> Cancel Request </td>
                     </tr>
-                    {pending &&
-                      pending.map((friend) => (
-                        <tr>
+                    {pending?.map((friend) => (
+                        <tr key={friend}>
                           <td> {friend}</td>
                           <td style={{ width: "30%" }}>
                             <button
                               type='button'
+                              aria-label={`Cancel request to ${friend}`}
                               className='btn'
                               onClick={(event) => {
                                 event.preventDefault()
@@ -123,13 +119,13 @@ const Friends = () => {
                       <td>Name</td>
                       <td style={{ width: "30%" }}> Accept/Reject </td>
                     </tr>
-                    {requests &&
-                      requests.map((friend) => (
-                        <tr>
+                    {requests?.map((friend) => (
+                        <tr key={friend}>
                           <td> {friend}</td>
                           <td style={{ width: "30%" }}>
                             <button
                               type='button'
+                              aria-label={`Accept request from ${friend}`}
                               className='btn'
                               onClick={(event) => {
                                 event.preventDefault()
@@ -140,6 +136,7 @@ const Friends = () => {
                             </button>
                             <button
                               type='button'
+                              aria-label={`Reject request from ${friend}`}
                               className='btn'
                               onClick={(event) => {
                                 event.preventDefault()

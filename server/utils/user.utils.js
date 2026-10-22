@@ -1,13 +1,19 @@
 // Importing Node Modules
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const secret = process.env.SECRET;
+const { randomUUID } = require('node:crypto');
 
 // Importing File Dependencies
 const ControllerError = require('../errors/controller.error.js');
 const userService = require('../services/user.service.js');
 
+const getSigningKey = () => {
+  if (!process.env.SECRET) throw new ControllerError(503, 'Authentication unavailable.');
+  return process.env.SECRET;
+};
+
 const validateUser = async (data) => {
+  getSigningKey();
   let res;
   // Checking if user exists in database
   if (data.hasOwnProperty('username'))
@@ -35,8 +41,10 @@ const checkExist = async (entity, entityValue) => {
 };
 
 const signToken = (id) => {
-  const token = jwt.sign({ id }, secret, {
+  const token = jwt.sign({ id }, getSigningKey(), {
     expiresIn: '9999 years',
+    algorithm: 'HS256',
+    jwtid: randomUUID(),
   });
   return token;
 };
@@ -57,5 +65,6 @@ module.exports = {
   checkExist,
   signToken,
   hashPassword,
-  checkPassword
+  checkPassword,
+  getSigningKey
 };

@@ -1,4 +1,4 @@
-import React, {useEffect} from "react"
+import {useEffect} from "react"
 import "./Hackerrank.scss"
 import { useAppContext } from "../../Context/appContext"
 import { Container, Row, Col, Card} from "react-bootstrap"
@@ -15,9 +15,9 @@ const Hackerrank = (props) => {
     totalBadges,
     badgeData,
   } = useAppContext()
-  useEffect(async () => {
-    getHackerrank(username)
-  }, [username]);
+  useEffect(() => {
+    if (typeof username === "string") getHackerrank(username)
+  }, [getHackerrank, username])
   return (
     <div className='hackerrank'>
       <Container>
@@ -33,7 +33,7 @@ const Hackerrank = (props) => {
             <Card className='g-card'>
               <Card.Body>
                 <Card.Title>Hackerrank Data</Card.Title>
-                <Card.Text>
+                <Card.Text as="div">
                   <Row>
                     <Col lg={6}>Level: {level}</Col>
                     <Col lg={6}>Followers: {followers_count}</Col>
@@ -53,12 +53,11 @@ const Hackerrank = (props) => {
             <Card className='g-card'>
               <Card.Body>
                 <Card.Title>Hackerrank Badges</Card.Title>
-                <Card.Text>
+                <Card.Text as="div">
                   <Row>
-                    {badgeData &&
-                      badgeData.map((badge) => {
+                    {badgeData?.map((badge) => {
                         return (
-                          <Col lg={6} className='p-2'>
+                          <Col key={badge.badge_name} lg={6} className='p-2'>
                             {badge.badge_name} {badge.stars}⭐
                           </Col>
                         )

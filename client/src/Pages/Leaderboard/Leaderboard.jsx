@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import NavbarComponent from "../../Components/Navbar/NavbarComponent"
 import { Outlet } from "react-router-dom"
-import { Table, Row, Button, Col } from "react-bootstrap"
+import { Table, Row, Button } from "react-bootstrap"
 import { Footer } from "../../Components/Footer/Footer.jsx"
 import { useAppContext } from "../../Context/appContext"
 import { Link } from "react-router-dom"
@@ -16,12 +16,11 @@ const Leaderboard = () => {
     friendsdata,
   } = useAppContext()
 
-  const [isGlobal, setIsGlobal] = useState(false)
+  const [isGlobal, setIsGlobal] = useState(true)
 
-  useEffect(async () => {
-    await getGlobalLeaderboard()
-    setIsGlobal(true)
-  }, [])
+  useEffect(() => {
+    getGlobalLeaderboard()
+  }, [getGlobalLeaderboard])
 
   const handleGlobal = (e) => {
     e.preventDefault()
@@ -35,8 +34,6 @@ const Leaderboard = () => {
     getFriendsLeaderboard()
   }
 
-  let count = 1
-
   return (
     <div className='leaderboard-home'>
       <Outlet />
@@ -46,8 +43,7 @@ const Leaderboard = () => {
         <div className='leaderboard-card' style={{ color: "white" }}>
           <Row className='mx-0'>
             <Button
-              as={Col}
-              className={isGlobal ? "active-btn" : "inactive-btn"}
+              className={`col ${isGlobal ? "active-btn" : "inactive-btn"}`}
               style={{ marginRight: "20px" }}
               onClick={handleGlobal}
             >
@@ -55,14 +51,13 @@ const Leaderboard = () => {
             </Button>
             <br />
             <Button
-              as={Col}
-              className={isGlobal ? "inactive-btn" : "active-btn"}
+              className={`col ${isGlobal ? "inactive-btn" : "active-btn"}`}
               onClick={handleLocal}
             >
               Friends
             </Button>
           </Row>
-          <Table bordered style={{ color: "white", "border-color": "#79828a" }}>
+          <Table bordered style={{ color: "white", borderColor: "#79828a" }}>
             <thead>
               <tr>
                 <th>#Rank</th>
@@ -72,19 +67,17 @@ const Leaderboard = () => {
             </thead>
             <tbody>
               {isGlobal
-                ? globaldata &&
-                globaldata.map((global, index) => (
-                  <tr>
-                    <td>{count++}</td>
-                    <Link to={`/search/${global.username}`}><td>{global.name}</td></Link>
+                ? globaldata?.map((global, index) => (
+                  <tr key={global.username}>
+                    <td>{index + 1}</td>
+                    <td><Link to={`/search/${global.username}`}>{global.name}</Link></td>
                     <td>{global.rating}</td>
                   </tr>
                 ))
-                : friendsdata &&
-                friendsdata.map((friend, index) => (
-                  <tr>
-                    <td>{count++}</td>
-                    <Link to={`/search/${friend.username}`}><td>{friend.name}</td></Link>
+                : friendsdata?.map((friend, index) => (
+                  <tr key={friend.username}>
+                    <td>{index + 1}</td>
+                    <td><Link to={`/search/${friend.username}`}>{friend.name}</Link></td>
                     <td>{friend.rating}</td>
                   </tr>
                 ))}

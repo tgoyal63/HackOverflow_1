@@ -50,7 +50,7 @@ import {
   GET_FRIEND_LEADERBOARD_BEGIN,
   GET_FRIEND_LEADERBOARD_SUCCESS,
 } from "./action"
-import { initialState } from "./appContext"
+import { initialState, platformState } from "./initialState"
 
 const reducer = (state, action) => {
   if (action.type === REGISTER_USER_BEGIN) {
@@ -59,9 +59,10 @@ const reducer = (state, action) => {
 
   if (action.type === REGISTER_USER_SUCCESS) {
     return {
-      ...state,
+      ...initialState,
       token: action.payload.token,
       data: action.payload.data,
+      isLogout: false,
       isLogin: false,
       isRegister: true,
     }
@@ -79,7 +80,7 @@ const reducer = (state, action) => {
 
   if (action.type === LOGIN_USER_SUCCESS) {
     return {
-      ...state,
+      ...initialState,
       token: action.payload.token,
       isLogout: false,
       isLogin: true,
@@ -89,6 +90,7 @@ const reducer = (state, action) => {
 
   if (action.type === LOGIN_USER_ERROR) {
     return {
+      ...state,
       isLogin: false,
     }
   }
@@ -130,21 +132,22 @@ const reducer = (state, action) => {
   }
 
   if (action.type === CHANGE_PW_BEGIN) {
-    return { ...state }
+    return { ...state, isError: false }
   }
   if (action.type === CHANGE_PW_SUCCESS) {
-    return { ...state, token: action.payload.token }
+    return { ...state, token: action.payload.token, isError: false }
   }
   if (action.type === CHANGE_PW_ERROR) {
     return { ...state, isError: true }
   }
 
   if (action.type === GET_GITHUBDATA_BEGIN) {
-    return { ...state }
+    return { ...state, isGithubError: false }
   }
   if (action.type === GET_GITHUBDATA_SUCCESS) {
     return {
       ...state,
+      isGithubError: false,
       graph: action.payload.graph,
       stats: action.payload.stats,
       mul: action.payload.mul,
@@ -202,7 +205,16 @@ const reducer = (state, action) => {
   }
 
   if (action.type === SEARCH_USER_BEGIN) {
-    return { ...state }
+    return {
+      ...state,
+      ...platformState,
+      name: undefined,
+      socials: undefined,
+      status: undefined,
+      upvotes: undefined,
+      downvotes: undefined,
+      voteStatus: undefined,
+    }
   }
   if (action.type === SEARCH_USER_SUCCESS) {
     return {
@@ -220,7 +232,7 @@ const reducer = (state, action) => {
   }
 
   if (action.type === ADD_FRIEND_BEGIN) {
-    return { ...state }
+    return { ...state, isAdd: false }
   }
   if (action.type === ADD_FRIEND_SUCCESS) {
     return { ...state, isAdd: true }
@@ -265,10 +277,10 @@ const reducer = (state, action) => {
     }
   }
   if (action.type === GET_CANCEL_REQ_BEGIN) {
-    return { ...state }
+    return { ...state, isRemove: false, isRemoved: false }
   }
   if (action.type === GET_CANCEL_REQ_SUCCESS) {
-    return { ...state, isRemove: true }
+    return { ...state, isRemove: true, isRemoved: true }
   }
   if (action.type === GET_ACCEPT_REQ_BEGIN) {
     return { ...state }
@@ -278,13 +290,13 @@ const reducer = (state, action) => {
   }
 
   if (action.type === GET_UPVOTE_BEGIN) {
-    return { ...state }
+    return { ...state, isUpVote: false }
   }
   if (action.type === GET_UPVOTE_SUCCESS) {
     return { ...state, isUpVote: true }
   }
   if (action.type === GET_DOWNVOTE_BEGIN) {
-    return { ...state }
+    return { ...state, isDownVote: false }
   }
   if (action.type === GET_DOWNVOTE_SUCCESS) {
     return { ...state, isDownVote: true }
@@ -308,6 +320,8 @@ const reducer = (state, action) => {
   if (action.type === GET_FRIEND_LEADERBOARD_SUCCESS) {
     return { ...state, friendsdata: action.payload.friendsdata }
   }
+
+  return state
 }
 
 export default reducer

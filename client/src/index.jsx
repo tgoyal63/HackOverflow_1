@@ -1,15 +1,14 @@
 import React from "react"
-import ReactDOM from "react-dom"
+import { createRoot } from "react-dom/client"
 import "./index.scss"
 import App from "./App"
 import "bootstrap/dist/css/bootstrap.min.css"
 import { AppProvider } from "./Context/appContext"
 
-ReactDOM.render(
+createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AppProvider>
       <App />
     </AppProvider>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 )

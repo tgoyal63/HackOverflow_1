@@ -1,98 +1,52 @@
-# Getting Started with Create React App
+# HackOverflow frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Use Node.js 22.22.2 or later within the Node 22 release line. Run commands from
+this directory. The app uses React 18, React Router 7, Vite, Vitest, and Biome.
 
-## Available Scripts
+```sh
+npm ci --include=dev
+npm run dev
+```
 
-In the project directory, you can run:
+Development runs at `http://localhost:3000`. To use a local API, set
+`VITE_API_BASE_URL=http://localhost:8082` in `.env.local` before starting Vite.
+The default remains `https://hackoverflow-backend.vercel.app`. Vite variables are
+public build configuration: do not put credentials in them.
 
-### `npm run dev`
+Production uses a compiled static
+bundle and a separate lightweight server:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```sh
+npm test
+npm run build
+npm run test:production
+npm start
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+`npm run build` runs the lint gate, then writes the production bundle to `build`.
+`npm run lint` rejects warnings; `npm run test:watch` starts interactive tests.
+The HTTP smoke tests launch the real production start command on a temporary port
+and verify direct routes, assets, HEAD, and startup failures.
 
-### `npm start`
+`npm start` serves existing build files using `serve-handler` with React Router
+fallback. It binds to `0.0.0.0:$PORT` (default 3000), rejects invalid/occupied ports,
+and fails if `build/index.html` is absent. It never compiles or watches source.
+The `asset-manifest.json` URL and main JS/CSS entries remain available.
 
-Serves the existing production `build` directory with `serve-handler`, including fallback
-to `index.html` for React Router links. Run `npm run build` first. The server binds
-to `0.0.0.0` on `PORT` (default `3000`) and does not compile or watch source files.
-If the port is already in use, startup fails instead of choosing a different port.
+## Existing Render service
 
-### `npm run test:production`
-
-After building, runs HTTP smoke tests against the actual `npm start` command on a
-temporary port. Requires Node.js 18 or later.
-
-## Render web service
-
-For the existing frontend service `srv-chrqa464dadfn66u54eg`, use:
-
-- Node.js: `22.x` (declared in `package.json` and checked in a Linux container)
+- Service: `srv-chrqa464dadfn66u54eg`
 - Root directory: `client`
-- Build command: `npm ci && npm run build`
+- Build command: `npm ci --include=dev && npm run build`
 - Start command: `npm start`
 - Health check path: `/`
-- Instance type: **Free** (512 MB)
+- Instance type: **Free**, 512 MB
 
-Compilation belongs in the build phase. Running the development server or building
-inside the start command consumes the web service's limited runtime memory.
-The frontend continues to call the separately hosted backend configured in
-`src/Context/appContext.js`.
+Build dependencies must be included even when the environment sets
+`NODE_ENV=production`. Compilation stays in the build phase, outside the web
+service's limited runtime memory. The frontend calls the separately hosted
+backend configured in `src/Context/appContext.jsx`.
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The existing Vercel frontend is also connected to `main`. `vercel.json` selects
+Vite, includes build dependencies, publishes `build`, and supports direct SPA
+routes. Both existing Vercel projects use Node 22; the backend root is `server`.

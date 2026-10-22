@@ -1,4 +1,3 @@
-import React from "react"
 import NavbarComponent from "../../Components/Navbar/NavbarComponent"
 import "./About.scss"
 import eren from "./eren.png"
@@ -14,7 +13,7 @@ const About = () => {
         <div className='about-main'>
           <AboutCard
             name='Tushar Goyal'
-            role='Backend Developer'
+            jobTitle='Backend Developer'
             linkedin='https://www.linkedin.com/in/tgoyal63'
             github='https://github.com/tgoyal63'
             email='mailto:tgoyal63@duck.com'
@@ -25,7 +24,7 @@ const About = () => {
           />
           <AboutCard
             name='Priyanka Prasad'
-            role='Web Designer'
+            jobTitle='Web Designer'
             linkedin='https://www.linkedin.com/in/prykdev/'
             github='https://github.com/prykdev'
             email='mailto:priyankaafssulur@gmail.com'
@@ -36,7 +35,7 @@ const About = () => {
           />
           <AboutCard
             name='Ayush Singla'
-            role='Frontend Developer'
+            jobTitle='Frontend Developer'
             linkedin='https://www.linkedin.com/in/ayu913'
             github='https://github.com/ayu913'
             email='mailto:ayushsingla909@gmail.com'

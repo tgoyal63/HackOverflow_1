@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import "./CodeChef.scss"
 import { useAppContext } from "../../Context/appContext"
 import { Container, Row, Col, Card } from "react-bootstrap"
@@ -16,9 +16,9 @@ const CodeChef = (props) => {
     country,
     submissionStats,
   } = useAppContext()
-  useEffect(async () => {
-    getCodechef(username)
-  }, [username])
+  useEffect(() => {
+    if (typeof username === "string") getCodechef(username)
+  }, [getCodechef, username])
   return (
     <div className='codechef'>
       <Container>
@@ -33,7 +33,7 @@ const CodeChef = (props) => {
             <Card className='g-card'>
               <Card.Body>
                 <Card.Title>CodeChef Data</Card.Title>
-                <Card.Text>
+                <Card.Text as="div">
                   <Row>
                     <Col lg={6}>Ratings: {ratings}</Col>
                     <Col lg={6}>Global Rank: {global}</Col>
@@ -54,46 +54,45 @@ const CodeChef = (props) => {
             <Card className='g-card'>
               <Card.Body>
                 <Card.Title>CodeChef Submission Stats</Card.Title>
-                <Card.Text>
+                <Card.Text as="div">
                   <Row>
                     <Col lg={6}>
                       Partially Solved:{" "}
-                      {submissionStats &&
-                        submissionStats.partiallySolvedProblems}
+                      {submissionStats?.partiallySolvedProblems}
                     </Col>
                     <Col lg={6}>
                       Solved Problems:{" "}
-                      {submissionStats && submissionStats.solvedProblems}
+                      {submissionStats?.solvedProblems}
                     </Col>
                   </Row>
                   <Row>
                     <Col lg={6}>
                       Attempted Problems:{" "}
-                      {submissionStats && submissionStats.attemptedProblems}
+                      {submissionStats?.attemptedProblems}
                     </Col>
                     <Col lg={6}>
                       Time Limit exceeded:{" "}
-                      {submissionStats && submissionStats.timeLimitExceed}
+                      {submissionStats?.timeLimitExceed}
                     </Col>
                   </Row>
                   <Row>
                     <Col lg={6}>
                       Submitted Solutions:{" "}
-                      {submissionStats && submissionStats.submittedSolutions}
+                      {submissionStats?.submittedSolutions}
                     </Col>
                     <Col lg={6}>
                       Wrong Submissions:{" "}
-                      {submissionStats && submissionStats.wrongSubmissions}
+                      {submissionStats?.wrongSubmissions}
                     </Col>
                   </Row>
                   <Row>
                     <Col lg={6}>
                       Accepted Submission:{" "}
-                      {submissionStats && submissionStats.acceptedSubmissions}
+                      {submissionStats?.acceptedSubmissions}
                     </Col>
                     <Col lg={6}>
                       RunTime Error:{" "}
-                      {submissionStats && submissionStats.runTimeError}
+                      {submissionStats?.runTimeError}
                     </Col>
                   </Row>
                 </Card.Text>

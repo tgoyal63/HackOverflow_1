@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import "./Dashboard.scss"
 import NavbarComponent from "../../Components/Navbar/NavbarComponent"
 import { Footer } from "../../Components/Footer/Footer.jsx"
@@ -9,9 +9,9 @@ import CodeChef from "../../Components/CodeChef/CodeChef"
 
 const Dashboard = () => {
   const { getUser } = useAppContext()
-  useEffect(async () => {
-    await getUser();
-  }, []);
+  useEffect(() => {
+    getUser()
+  }, [getUser])
 
   return (
     <div className='dashboardHome'>

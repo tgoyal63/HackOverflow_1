@@ -5,7 +5,7 @@ const voteSchema = new Schema({
     voter: { type: Schema.Types.ObjectId, ref: 'users' },
     status: {
         type: Number,
-        enums: [
+        enum: [
             1,    //Upvote
             0,    //Neutral
             -1,   //Downvote

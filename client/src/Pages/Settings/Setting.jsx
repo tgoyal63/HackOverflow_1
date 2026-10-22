@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import "./Setting.scss"
 import NavbarComponent from "../../Components/Navbar/NavbarComponent"
 import { Container, Row, Col, Card, Button } from "react-bootstrap"
@@ -29,7 +29,7 @@ const Setting = () => {
 
   useEffect(() => {
     getUser()
-  }, [])
+  }, [getUser])
 
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value })
@@ -37,6 +37,7 @@ const Setting = () => {
 
   const handleClick = (e) => {
     e.preventDefault()
+    setValues({ github: github || "", hackerrank: hackerrank || "", codechef: codechef || "" })
     setIsEdit(true)
   }
 
@@ -45,20 +46,22 @@ const Setting = () => {
     setIsEdit(false)
   }
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault()
     const { github, hackerrank, codechef } = values
     const socials = { github, hackerrank, codechef }
     const socialsdata = { socials }
-    editSocials(socialsdata)
-    getUser()
-
-    setIsEdit(false)
-    toast("Socials Changed Successfully")
+    const succeeded = await editSocials(socialsdata)
+    if (succeeded) {
+      await getUser()
+      setIsEdit(false)
+      toast("Socials Changed Successfully")
+    } else {
+      toast("Unable to change socials")
+    }
   }
 
   return (
-    <>
       <div className='home'>
         <NavbarComponent />
         <div className='settings'>
@@ -122,6 +125,7 @@ const Setting = () => {
                             className='data-text'
                             required
                             name='github'
+                            aria-label='GitHub username'
                             value={values.github}
                             onChange={handleChange}
                           />
@@ -144,6 +148,7 @@ const Setting = () => {
                             className='data-text'
                             required
                             name='codechef'
+                            aria-label='CodeChef username'
                             value={values.codechef}
                             onChange={handleChange}
                           />
@@ -166,6 +171,7 @@ const Setting = () => {
                             className='data-text'
                             required
                             name='hackerrank'
+                            aria-label='HackerRank username'
                             value={values.hackerrank}
                             onChange={handleChange}
                           />
@@ -214,7 +220,6 @@ const Setting = () => {
         </div>
         <ToastContainer />
       </div>
-    </>
   )
 }
 

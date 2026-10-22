@@ -15,7 +15,7 @@ const signUpSchema = {
       // leetcode: Joi.string(),
       codechef: Joi.string().required(),
       hackerrank: Joi.string().required()
-    })
+    }).required()
   }),
 };
 
@@ -47,6 +47,11 @@ const checkSchema = {
   ),
 }
 
+const socialCheckSchema = {
+  params: Joi.object({ social: Joi.string().valid('github', 'hackerrank', 'codechef').required() }),
+  body: Joi.object({ username: Joi.string().required() }),
+};
+
 const editSchema = {
   body: Joi.object({
     socials: Joi.object({
@@ -57,7 +62,7 @@ const editSchema = {
       // leetcode: Joi.string(),
       codechef: Joi.string().required(),
       hackerrank: Joi.string().required()
-    })
+    }).required()
   }),
 };
 
@@ -72,6 +77,7 @@ module.exports = {
   signUpSchema,
   loginSchema,
   checkSchema,
+  socialCheckSchema,
   editSchema,
   changePasswordSchema
 };

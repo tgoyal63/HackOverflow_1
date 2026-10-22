@@ -1,24 +1,25 @@
 // Importing Node Modules
 const jwt = require('jsonwebtoken');
 
-const secret = process.env.SECRET;
-
 // Importing File Dependencies
 const ControllerError = require('../errors/controller.error.js');
 const userService = require('../services/user.service.js');
+const { getSigningKey } = require('../utils/user.utils.js');
 
 module.exports = async (req, res, next) => {
   try {
     // Checking if authorization header is provided
     if (!(req.headers && req.headers.authorization)) throw new ControllerError(403, 'Access denied! No token provided.');
-    const token = req.headers.authorization.split(' ')[1];
+    const match = /^Bearer ([^\s]+)$/i.exec(req.headers.authorization);
+    const token = match && match[1];
 
     // Checking if token is provided
     if (!token) throw new ControllerError(403, 'Access denied! No token provided.');
-    const decodedJWT = await jwt.verify(token, secret);
+    const decodedJWT = jwt.verify(token, getSigningKey(), { algorithms: ['HS256'] });
 
     // Checking if the user is valid
-    if (!decodedJWT) throw new ControllerError(401, 'Unauthorized!');
+    if (!decodedJWT || typeof decodedJWT.id !== 'string' || !/^[a-f\d]{24}$/i.test(decodedJWT.id))
+      throw new ControllerError(401, 'Unauthorized!');
     const data = await userService.searchByEntity('_id', decodedJWT.id);
     if (data && token === data.token) {
       req.user = data;

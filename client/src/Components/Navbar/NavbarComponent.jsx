@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { Nav, NavDropdown, Container, Navbar, Button } from "react-bootstrap"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { useAppContext } from "../../Context/appContext"
 import { useNavigate } from "react-router-dom"
 import "./NavbarComponent.scss"
@@ -8,12 +8,13 @@ import "font-awesome/css/font-awesome.min.css"
 import { ToastContainer, toast } from "react-toastify"
 
 const NavbarComponent = ({ pathname }) => {
-  const { token, logoutUser, socials, loginUsername } = useAppContext()
+  const { token, logoutUser, loginUsername } = useAppContext()
   const navigate = useNavigate()
+  const location = useLocation()
+  const currentPath = pathname ?? location.pathname
   const [username, setSearchUsername] = useState("")
 
-  const [isLogin, setIsLogin] = useState(false)
-  const [isLogoutUser, setIsLogoutUser] = useState(false)
+  const isLogin = currentPath === "/" || currentPath === "/register"
 
   const handleChange = (e) => {
     e.preventDefault()
@@ -23,38 +24,31 @@ const NavbarComponent = ({ pathname }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (username === loginUsername) {
+    const searchUsername = username.trim()
+    if (!searchUsername) return
+
+    if (searchUsername === loginUsername) {
       navigate("/dashboard")
     } else {
-      navigate(`/search/${username}`)
+      navigate(`/search/${encodeURIComponent(searchUsername)}`)
     }
   }
 
-  const proRef = useRef()
   useEffect(() => {
-    if (pathname === "/" || pathname === "/register") {
-      setIsLogin(true)
-    } else if (!token) {
-      navigate("/")
-    }
+    if (!isLogin && !token) navigate("/")
+  }, [isLogin, navigate, token])
 
-    if (isLogoutUser) {
-      toast("User Logout Successfully")
-    }
-  }, [token, socials, isLogoutUser])
-
-  const handleLogout = (e) => {
-    setIsLogoutUser(!isLogoutUser)
-    setTimeout(() => {
-      logoutUser()
-    }, 3000)
+  const handleLogout = () => {
+    logoutUser()
+    toast("User Logout Successfully")
   }
 
   return (
     <Navbar sticky='top' className='navheader' collapseOnSelect expand='lg'>
       <Container>
         <Navbar.Brand
-          href={!isLogin ? "" : "/"}
+          as={Link}
+          to={isLogin ? "/" : "/dashboard"}
           className='nav-logo'
           style={{ cursor: "pointer" }}
         >
@@ -71,13 +65,14 @@ const NavbarComponent = ({ pathname }) => {
                   <input
                     type='text'
                     name='username'
+                    aria-label='Search username'
                     value={username}
                     onChange={handleChange}
                     className='search-input'
                     placeholder='Enter Username'
                     required
                   />
-                  <button className='btn btn-outline-secondary' type='submit'>
+                  <button className='btn btn-outline-secondary' type='submit' aria-label='Search'>
                     <i className='fa fa-search'></i>
                   </button>
                 </form>
@@ -113,7 +108,6 @@ const NavbarComponent = ({ pathname }) => {
                 About
               </Nav.Link> */}
               <NavDropdown
-                ref={proRef}
                 title='Profile ▼'
                 id='collasible-nav-dropdown'
               >
@@ -131,9 +125,7 @@ const NavbarComponent = ({ pathname }) => {
                 Logout
               </Button> */}
             </Nav>
-          ) : (
-            <></>
-          )}
+          ) : null}
         </Navbar.Collapse>
       </Container>
       <ToastContainer />

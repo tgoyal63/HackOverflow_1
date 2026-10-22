@@ -1,6 +1,5 @@
-import React from "react"
 import "./Homepage.scss"
-import Button from "@material-ui/core/Button"
+import Button from "react-bootstrap/Button"
 import img1 from "./img-1.svg"
 import img2 from "./img-2.svg"
 import NavbarComponent from "../../Components/Navbar/NavbarComponent"
@@ -17,7 +16,7 @@ export const Homepage = () => {
       <div className='main-home'>
         <NavbarComponent pathname={pathname} />
 
-        <div id='home'>
+        <div id='home' className='home-section'>
           <div className='home-container'>
             <div className='home-content'>
               <div className='home-lead'>
@@ -29,24 +28,22 @@ export const Homepage = () => {
                 globe and with our friends
               </div>
 
-              <Link to='/register' style={{ textDecoration: "none" }}>
-                <Button
-                  style={{ marginTop: 25, backgroundColor: "#FF6666" }}
-                  size='large'
-                  variant='contained'
-                  color='primary'
-                  disableElevation
-                >
-                  Register
-                </Button>
-              </Link>
+              <Button
+                as={Link}
+                to='/register'
+                role='link'
+                variant='custom'
+                className='register-link'
+              >
+                Register
+              </Button>
             </div>
 
             <img className='home-img' src={img2} alt='' />
           </div>
         </div>
 
-        <div id='home'>
+        <div id='about' className='home-section'>
           <div className='home-container'>
             <img className='home-img' src={img1} alt='' />
 

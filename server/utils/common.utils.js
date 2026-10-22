@@ -1,84 +1,91 @@
 const axios = require('axios');
-const CommonUtils = {
-  generateResponse: (statusCode, message, data) => {
-    console.log(`msg: ${message}, data: ${data}`);
-    return {
-      statusCode,
-      message,
-      data,
-    };
-  },
-  customError: (status, msg) => ({
-    status,
-    msg,
-    isCustom: true,
-  }),
-  removeDuplicateFromArray: (arr) => [...new Set(arr)],
-  getRequest: async (url, headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0" }) => {
-    const data = await axios({
-      method: 'get',
-      url,
-      headers,
+const ControllerError = require('../errors/controller.error.js');
+const ServiceError = require('../errors/service.error.js');
+
+const request = async (config) => {
+  try {
+    return await axios({
+      timeout: 10000,
+      maxContentLength: 2 * 1024 * 1024,
+      maxBodyLength: 2 * 1024 * 1024,
+      maxRedirects: 2,
+      validateStatus: () => true,
+      ...config,
     });
-    return data;
-  },
-  getCodechefToken: async () => {
-    const data = await axios({
-      method: "POST",
-      url: "https://api.codechef.com/oauth/token",
-      data: {
-        client_id: process.env.CODECHEF_CLIENT_ID,
-        client_secret: process.env.CODECHEF_CLIENT_SECRET,
-        grant_type: "client_credentials",
-      },
-    });
-    return data.data.result.data.access_token;
-  },
-  formatDate: (date) => {
-    const d = new Date(date);
-    const month = `${d.getMonth() + 1}`;
-    const day = `${d.getDate()}`;
-    const year = d.getFullYear();
-    return [day, month, year].join('-');
+  } catch (error) {
+    // Never forward Axios errors: their config can contain upstream credentials.
+    const timedOut = ['ECONNABORTED', 'ETIMEDOUT'].includes(error.code);
+    throw new ServiceError(timedOut ? 504 : 502,
+      timedOut ? 'Social provider timed out.' : 'Social provider unavailable.');
   }
 };
 
-const getSocialData = async (social, username) => {
-  let url, headers;
-  if (social === 'github')
-    url = `https://api.github.com/users/${username}`;
-  else if (social === 'hackerrank')
-    url = `https://www.hackerrank.com/rest/contests/master/hackers/${username}/profile`;
-  else if (social === 'codechef') {
-    url = `https://api.codechef.com/users/${username}`;
-    const accessToken = await CommonUtils.getCodechefToken();
-    headers = {
-      Authorization: `Bearer ${accessToken}`
-    };
-  }
-  try {
-    const data = await CommonUtils.getRequest(url, headers);
-    return data;
-  } catch (error) {
-    if (error.response.status === 404) {
-      return error.response;
+const CommonUtils = {
+  generateResponse: (statusCode, message, data) => ({ statusCode, message, data }),
+  customError: (status, msg) => ({ status, msg, isCustom: true }),
+  removeDuplicateFromArray: (arr) => [...new Set(arr)],
+  getRequest: (url, headers = { 'User-Agent': 'HackOverflow' }) => request({ method: 'get', url, headers }),
+  getCodechefToken: async () => {
+    if (!process.env.CODECHEF_CLIENT_ID || !process.env.CODECHEF_CLIENT_SECRET) {
+      throw new ServiceError(503, 'Codechef integration unavailable.');
     }
-    return error.response;
+    const response = await request({
+      method: 'post',
+      url: 'https://api.codechef.com/oauth/token',
+      data: {
+        client_id: process.env.CODECHEF_CLIENT_ID,
+        client_secret: process.env.CODECHEF_CLIENT_SECRET,
+        grant_type: 'client_credentials',
+      },
+    });
+    const token = response.data?.result?.data?.access_token;
+    if (response.status !== 200 || typeof token !== 'string' || !token) {
+      throw new ServiceError(502, 'Codechef authentication unavailable.');
+    }
+    return token;
+  },
+  formatDate: (date) => {
+    const d = new Date(date);
+    return [d.getDate(), d.getMonth() + 1, d.getFullYear()].join('-');
+  },
+};
+
+const getSocialData = async (social, username) => {
+  if (!['github', 'hackerrank', 'codechef'].includes(social)) {
+    throw new ControllerError(400, 'Unsupported social provider.');
   }
-}
+  if (typeof username !== 'string' || !username.trim()) {
+    throw new ControllerError(400, 'Social username required.');
+  }
+  const handle = encodeURIComponent(username);
+  const urls = {
+    github: `https://api.github.com/users/${handle}`,
+    hackerrank: `https://www.hackerrank.com/rest/contests/master/hackers/${handle}/profile`,
+    codechef: `https://api.codechef.com/users/${handle}`,
+  };
+  const headers = social === 'codechef'
+    ? { Authorization: `Bearer ${await CommonUtils.getCodechefToken()}` }
+    : undefined;
+  const response = await CommonUtils.getRequest(urls[social], headers);
+  if ([200, 404].includes(response.status)) return response;
+  if (social === 'github' && response.status === 403 && (
+    response.headers?.['x-ratelimit-remaining'] === '0' ||
+    /rate limit/i.test(response.data?.message || '')
+  )) return { ...response, statusText: 'rate limit exceeded' };
+  throw new ServiceError(502, 'Social provider unavailable.');
+};
 
 const checkAllSocials = async (socials) => {
-  const github = await getSocialData("github", socials.github);
-  const hackerrank = await getSocialData("hackerrank", socials.hackerrank);
-  const codechef = await getSocialData("codechef", socials.codechef);
-  if (github.status === 404)
-    return { status: 404, value: "Github" };
-  if (hackerrank.status === 404)
-    return { status: 404, value: "Hackerrank" };
-  if (codechef.status === 404 || codechef.data.result === undefined)
-    return { status: 404, value: "Codechef" };
-  return {status: 200};
-}
+  if (!socials) throw new ControllerError(400, 'Social usernames required.');
+  for (const [social, label] of [['github', 'Github'], ['hackerrank', 'Hackerrank'], ['codechef', 'Codechef']]) {
+    const response = await getSocialData(social, socials[social]);
+    if (response.status === 404 || (social === 'codechef' && !response.data?.result)) {
+      return { status: 404, value: label };
+    }
+    if (response.status !== 200) throw new ServiceError(503, `${label} validation unavailable.`);
+  }
+  return { status: 200 };
+};
 
 Object.freeze(CommonUtils);
 module.exports = { getSocialData, checkAllSocials, ...CommonUtils };

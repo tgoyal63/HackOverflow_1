@@ -1,18 +1,16 @@
 import "./App.scss"
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Landing from "./Pages/Landing/Landing"
 import Leaderboard from "./Pages/Leaderboard/Leaderboard"
 import Setting from "./Pages/Settings/Setting"
 import ChangePassword from "./Pages/ChangePassword/ChangePassword"
 import { Homepage } from "./Pages/Homepage/Homepage"
 import Dashboard from "./Pages/Dashboard/Dashboard"
-import About from "./Pages/About/About"
 import SearchDashboard from "./Pages/SearchDashboard/SearchDashboard"
 import Friends from "./Pages/Friends/Friends"
 
 function App() {
   return (
-    <>
       <BrowserRouter>
         <Routes>
           <Route path='/dashboard' element={<Dashboard />}></Route>
@@ -34,7 +32,6 @@ function App() {
           ></Route>
         </Routes>
       </BrowserRouter>
-    </>
   )
 }
 

@@ -17,7 +17,8 @@ module.exports = {
         from: 'friends',
         localField: 'friends',
         foreignField: '_id',
-        as: 'friends'
+        as: 'friends',
+        pipeline: [{ $match: { status: 3, requester: _id } }],
       }
     }, {
       $lookup: {

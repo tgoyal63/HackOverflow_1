@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import "./Github.scss"
 import { useAppContext } from "../../Context/appContext"
 import { Container, Row, Col, Card } from "react-bootstrap"
@@ -18,11 +18,10 @@ const Github = (props) => {
     following,
     organizations,
     github_created_at,
-    isGithubError,
   } = useAppContext()
-  useEffect(async () => {
-    getGithub(username)
-  }, [username]);
+  useEffect(() => {
+    if (typeof username === "string") getGithub(username)
+  }, [getGithub, username])
   return (
     <div className='github'>
       <Container>
@@ -35,26 +34,26 @@ const Github = (props) => {
         </div>
         <Row>
           <Col lg={12} className='githubStats'>
-            <img src={graph} width='100%' />
+            <img src={graph} alt="GitHub activity graph" width='100%' />
           </Col>
         </Row>
         <Row>
           <Col lg={6} className='githubStats'>
-            <img src={stats} width='100%' />
+            <img src={stats} alt="GitHub statistics" width='100%' />
           </Col>
           <Col lg={6} className='githubStats'>
-            <img src={contributions} width='100%' />
+            <img src={contributions} alt="GitHub contributions" width='100%' />
           </Col>
         </Row>
         <Row>
           <Col lg={6} className='githubStats'>
-            <img src={mul} width='100%' />
+            <img src={mul} alt="GitHub language statistics" width='100%' />
           </Col>
           <Col lg={6} className='githubStats'>
             <Card className='g-card'>
               <Card.Body>
                 <Card.Title>GitHub Data</Card.Title>
-                <Card.Text>
+                <Card.Text as="div">
                   <Row>
                     <Col lg={6}>Public Repos: {public_repos}</Col>
                     <Col lg={6}>Followers: {followers}</Col>

@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validate, ValidationError } = require('express-validation');
+const { validate } = require('express-validation');
 const user = require('../controllers/user.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const { signUpSchema, loginSchema, checkSchema, editSchema, changePasswordSchema } = require('../models/user.validators.js');
@@ -14,17 +14,5 @@ router.get('/profile', authMiddleware, user.profile);
 router.patch('/password', authMiddleware, validate(changePasswordSchema), user.changePassword);
 router.get('/friends/:type', authMiddleware, user.getFriends);
 // router.get('/votes/:type', authMiddleware, user.getVotes);
-
-// Validation Error Handling
-router.use((err, req, res, next) => {
-  if (err) {
-    const { name, details, statusCode } = err;
-    if (err instanceof ValidationError) {
-      return res.status(err.statusCode).json({ statusCode, name, message: details.body[0].message });
-    }
-    return res.status(500).json(err);
-  }
-  next();
-});
 
 module.exports = router;
