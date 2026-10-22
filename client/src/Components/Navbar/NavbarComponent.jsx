@@ -6,9 +6,11 @@ import "./NavbarComponent.scss";
 
 export function Brand({ to = "/", onClick }) {
 	return (
-		<Link className="brand" to={to} onClick={onClick}>
+		<Link className="brand" to={to} onClick={onClick} aria-label="HackOverflow">
 			<span>
-				Hack<span className="brand-accent">Overflow</span>
+				<span className="brand-accent">Ha</span>ck
+				<span className="brand-accent">Ov</span>er
+				<span className="brand-accent">flow</span>
 			</span>
 		</Link>
 	);
