@@ -19,10 +19,9 @@ import SearchDashboard from "./Pages/SearchDashboard/SearchDashboard";
 import Friends from "./Pages/Friends/Friends";
 import NavbarComponent from "./Components/Navbar/NavbarComponent";
 import { Footer } from "./Components/Footer/Footer";
-import { Icon } from "./Components/UI/Icon";
 
 const pageTitles = {
-	"/": "Your coding life, connected",
+	"/": "Coding profiles and community",
 	"/dashboard": "Dashboard",
 	"/register": "Your account",
 	"/friends": "Friends",
@@ -49,15 +48,11 @@ function NotFound() {
 		<div className="app-page">
 			<NavbarComponent />
 			<main id="main-content" className="workspace not-found">
-				<span className="state-icon">
-					<Icon name="search" size={24} />
-				</span>
-				<p className="eyebrow">404 · LOST IN THE CODE</p>
-				<h1>This page took a wrong turn.</h1>
-				<p>The link may have changed. Your workspace is still right here.</p>
+				<p className="muted">404</p>
+				<h1>Page not found</h1>
+				<p>Check the address or return to your dashboard.</p>
 				<Link className="button button-primary" to="/dashboard">
 					Back to dashboard
-					<Icon name="arrowRight" size={16} />
 				</Link>
 			</main>
 			<Footer />

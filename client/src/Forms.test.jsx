@@ -108,11 +108,11 @@ test("login keeps a visible error and lets the user inspect the password without
 test("the public sign-in URL selects login and switching modes preserves the register route", () => {
   context.token = null
   mount(<Landing />, "/register?mode=login")
-  expect(screen.getByRole("heading", { name: "Welcome back" })).toBeInTheDocument()
+  expect(screen.getByRole("heading", { name: "Sign in", level: 1 })).toBeInTheDocument()
   expect(screen.getByRole("form", { name: "Sign in" })).toBeInTheDocument()
   fireEvent.click(screen.getByRole("button", { name: "Sign up", exact: true }))
   expect(screen.getByRole("form", { name: "Create account" })).toBeInTheDocument()
-  expect(screen.getByRole("heading", { name: "Create your account" })).toBeInTheDocument()
+  expect(screen.getByRole("heading", { name: "Create account", level: 1 })).toBeInTheDocument()
 })
 
 test("account settings distinguish a real zero and prefill all connected usernames", () => {

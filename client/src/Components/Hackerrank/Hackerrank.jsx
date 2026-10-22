@@ -11,7 +11,7 @@ const Hackerrank = ({ username }) => {
     if (typeof username === "string") getHackerrank(username)
   }, [getHackerrank, username])
   const hasData = [level, followers_count, totalSubmissions, totalBadges].some(hasValue)
-  return <PlatformPanel platform="hackerrank" title="HackerRank" eyebrow="Problem solving" username={username}
+  return <PlatformPanel platform="hackerrank" title="HackerRank" username={username}
     handle={hackerrankUsername} resource={context.resources?.hackerrank} hasData={hasData}
     href={`https://www.hackerrank.com/${encodeURIComponent(hackerrankUsername || username || "")}`}
     onRetry={() => getHackerrank(username)}>

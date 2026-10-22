@@ -1,23 +1,16 @@
 .site-footer,
 .workspace-footer {
+	max-width: 1180px;
+	width: 100%;
+	margin: 0 auto;
 	border-top: 1px solid var(--border);
-	padding: 22px 40px;
+	padding: 20px 28px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 20px;
 	color: var(--subtle);
-	font-size: 10px;
-	line-height: 1.7;
-}
-.site-footer {
-	max-width: 1240px;
-	width: 100%;
-	margin: auto;
-	padding: 26px 32px;
-}
-.workspace-footer {
-	margin-left: 232px;
+	font-size: 13px;
 }
 .site-footer nav,
 .workspace-footer nav {
@@ -31,28 +24,17 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 7px;
+	min-height: 44px;
 }
 .site-footer a:hover,
 .workspace-footer a:hover {
 	color: var(--text);
 }
-.footer-separator {
-	color: #495161;
-	padding: 0 12px;
-}
-@media (max-width: 800px) {
-	.workspace-footer {
-		margin-left: 0;
-	}
+@media (max-width: 600px) {
 	.site-footer,
 	.workspace-footer {
-		padding: 22px 20px;
+		padding: 16px;
 		flex-wrap: wrap;
-		font-size: 10px;
-		gap: 14px;
-	}
-	.footer-tagline,
-	.footer-separator {
-		display: none;
+		gap: 8px;
 	}
 }

@@ -3,12 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAppContext } from "../../Context/appContext";
 import NavbarComponent from "../../Components/Navbar/NavbarComponent";
 import { Footer } from "../../Components/Footer/Footer";
-import {
-	Avatar,
-	PageHeader,
-	LoadingState,
-	ErrorState,
-} from "../../Components/UI/Surface";
+import { LoadingState, ErrorState } from "../../Components/UI/Surface";
 import { Icon } from "../../Components/UI/Icon";
 import Github from "../../Components/Github/Github";
 import Hackerrank from "../../Components/Hackerrank/Hackerrank";
@@ -121,17 +116,12 @@ export default function SearchDashboard() {
 			<main id="main-content" className="workspace">
 				<Link className="profile-back-link" to="/leaderboard">
 					<Icon name="arrowRight" size={14} />
-					Explore the community
+					Leaderboard
 				</Link>
-				<PageHeader
-					eyebrow="DEVELOPER PROFILE"
-					title="A closer look."
-					description="Explore their coding profiles and make a connection."
-				/>
-				<section
-					className="panel developer-profile"
-					aria-label="Developer profile"
-				>
+				<section className="developer-profile" aria-label="Developer profile">
+					{(loading || failed) && (
+						<h1 className="profile-loading-title">@{username}</h1>
+					)}
 					{loading ? (
 						<LoadingState label="Finding this developer…" />
 					) : failed ? (
@@ -151,10 +141,8 @@ export default function SearchDashboard() {
 					) : (
 						<>
 							<div className="developer-identity">
-								<Avatar name={ready ? name || username : username} size="lg" />
 								<div>
-									<span className="eyebrow">HACKOVERFLOW COMMUNITY</span>
-									<h2>{ready ? name || username : username}</h2>
+									<h1>{ready ? name || username : username}</h1>
 									<p>@{username}</p>
 								</div>
 								<div className="developer-connection">
@@ -272,17 +260,11 @@ export default function SearchDashboard() {
 					)}
 				</section>
 				{ready && (
-					<>
-						<div className="profile-platform-heading">
-							<h2 className="section-title">Coding profiles</h2>
-							<span className="muted">Their work, across platforms.</span>
-						</div>
-						<div className="dashboard-platforms">
-							<Github username={linkedHandle(socials?.github)} />
-							<Hackerrank username={linkedHandle(socials?.hackerrank)} />
-							<CodeChef username={linkedHandle(socials?.codechef)} />
-						</div>
-					</>
+					<div className="dashboard-platforms">
+						<Github username={linkedHandle(socials?.github)} />
+						<Hackerrank username={linkedHandle(socials?.hackerrank)} />
+						<CodeChef username={linkedHandle(socials?.codechef)} />
+					</div>
 				)}
 			</main>
 			<Footer />

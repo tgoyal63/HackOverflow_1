@@ -2,18 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAppContext } from "../../Context/appContext";
 import { Icon } from "../UI/Icon";
-import { Avatar } from "../UI/Surface";
 import "./NavbarComponent.scss";
 
 export function Brand({ to = "/", onClick }) {
 	return (
 		<Link className="brand" to={to} onClick={onClick}>
-			<span className="brand-mark">
-				<Icon name="code" size={20} />
-			</span>
 			<span>
 				Hack<span className="brand-accent">Overflow</span>
-				<span className="brand-dot">.</span>
 			</span>
 		</Link>
 	);
@@ -150,6 +145,46 @@ export default function NavbarComponent() {
 			<a className="skip-link" href="#main-content">
 				Skip to content
 			</a>
+			<header className="workspace-topbar">
+				<div className="topbar-brand">
+					<Brand to="/dashboard" />
+				</div>
+				<button
+					ref={menuButtonRef}
+					className="icon-button mobile-menu"
+					type="button"
+					aria-label="Open navigation"
+					aria-expanded={menuOpen}
+					aria-controls="workspace-navigation"
+					onClick={() => setMenuOpen((open) => !open)}
+				>
+					<Icon name="menu" />
+				</button>
+				<form
+					className="workspace-search search-landmark"
+					aria-label="Find a developer"
+					onSubmit={handleSearch}
+				>
+					<Icon name="search" size={18} />
+					<input
+						type="search"
+						aria-label="Search username"
+						placeholder="Search username"
+						value={search}
+						onChange={(event) => setSearch(event.target.value)}
+					/>
+					<button type="submit" className="search-submit" aria-label="Search">
+						<Icon name="arrowRight" size={18} />
+					</button>
+				</form>
+				<Link
+					to="/settings"
+					className="account-shortcut"
+					aria-label={`Account settings for ${account}`}
+				>
+					@{account}
+				</Link>
+			</header>
 			{menuOpen && (
 				<button
 					type="button"
@@ -175,7 +210,6 @@ export default function NavbarComponent() {
 						<Icon name="close" />
 					</button>
 				</div>
-				<p className="nav-section-label">Workspace</p>
 				<nav className="sidebar-nav" aria-label="Workspace navigation">
 					{navigation.map(({ to, icon, label }) => (
 						<NavLink
@@ -191,7 +225,6 @@ export default function NavbarComponent() {
 						</NavLink>
 					))}
 				</nav>
-				<p className="nav-section-label account-nav-label">Account</p>
 				<nav className="sidebar-nav" aria-label="Account navigation">
 					<NavLink
 						to="/settings"
@@ -215,14 +248,6 @@ export default function NavbarComponent() {
 					</NavLink>
 				</nav>
 				<div className="sidebar-bottom">
-					<div className="sidebar-note">
-						<span className="sidebar-note-icon">
-							<Icon name="code" />
-						</span>
-						<p>
-							Better together.<span>Keep coding. Keep connecting.</span>
-						</p>
-					</div>
 					<button
 						type="button"
 						className="sidebar-link logout-link"
@@ -236,44 +261,6 @@ export default function NavbarComponent() {
 					</button>
 				</div>
 			</aside>
-			<header className="workspace-topbar">
-				<button
-					ref={menuButtonRef}
-					className="icon-button mobile-menu"
-					type="button"
-					aria-label="Open navigation"
-					aria-expanded={menuOpen}
-					aria-controls="workspace-navigation"
-					onClick={() => setMenuOpen((open) => !open)}
-				>
-					<Icon name="menu" />
-				</button>
-				<form
-					className="workspace-search search-landmark"
-					aria-label="Find a developer"
-					onSubmit={handleSearch}
-				>
-					<Icon name="search" size={18} />
-					<input
-						type="search"
-						aria-label="Search username"
-						placeholder="Find a developer by username"
-						value={search}
-						onChange={(event) => setSearch(event.target.value)}
-					/>
-					<button type="submit" className="search-submit" aria-label="Search">
-						<Icon name="arrowRight" size={18} />
-					</button>
-				</form>
-				<Link
-					to="/settings"
-					className="account-shortcut"
-					aria-label={`Account settings for ${account}`}
-				>
-					<span className="account-shortcut-name">{account}</span>
-					<Avatar name={account} size="sm" />
-				</Link>
-			</header>
 		</>
 	);
 }

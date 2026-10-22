@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Icon } from "../UI/Icon"
-import { EmptyState, ErrorState, LoadingState } from "../UI/Surface"
+import { LoadingState } from "../UI/Surface"
 import "./Github.scss"
 
 export const hasValue = (value) => value !== null && value !== undefined && value !== "" &&
@@ -15,34 +15,35 @@ export const Metric = ({ label, value, featured = false }) => (
   </div>
 )
 
-export const PlatformPanel = ({ platform, title, eyebrow, username, handle, resource, hasData, href, onRetry, children }) => {
+export const PlatformPanel = ({ platform, title, username, handle, resource, hasData, href, onRetry, children }) => {
   const matchesIdentity = resource?.identity === undefined || resource.identity === username
   const status = !matchesIdentity ? "idle" : resource?.status || (hasData ? "success" : "idle")
   const available = status === "success" && hasData
-  const shownHandle = available ? handle || username : username
+  const showProfileLink = matchesIdentity && status === "success" && (handle || username)
+  const shownHandle = status === "success" && matchesIdentity ? handle || username : username
   return (
     <section id={platform} className={`panel platform-card platform-${platform}`} aria-labelledby={`${platform}-heading`}>
       <header className="platform-heading">
-        <div className="platform-heading-main">
-          <span className="platform-mark"><Icon name={platform === "github" ? "github" : "code"} size={23} /></span>
-          <div><p className="eyebrow">{eyebrow}</p><h2 id={`${platform}-heading`}>{title}</h2></div>
-        </div>
-        {shownHandle && <span className="platform-handle">@{shownHandle}</span>}
+        <h2 id={`${platform}-heading`}>{title}</h2>
+        {showProfileLink
+          ? <a href={href} target="_blank" rel="noopener noreferrer" className="platform-profile-link" aria-label={`View ${title} profile`}>@{shownHandle} <Icon name="external" size={13} /></a>
+          : shownHandle && <span className="platform-handle">@{shownHandle}</span>}
       </header>
       {status === "loading" && <LoadingState label={`Loading ${title} profile…`} />}
-      {status === "error" && <ErrorState title={`${title} unavailable`} message={resource.message}
-        onRetry={typeof username === "string" ? onRetry : undefined} />}
-      {status === "idle" && <EmptyState icon="link" title={typeof username === "string" ? `${title} profile not loaded` : `${title} isn’t linked`}
-        description={typeof username === "string" ? "Load this profile to see its public statistics." : "No public username has been linked to this profile."}
-        action={typeof username === "string" ? <button type="button" className="button button-secondary" onClick={onRetry}>Load {title}</button> : undefined} />}
-      {status === "success" && !hasData && <EmptyState icon="code" title="No statistics available"
-        description={`${title} returned no public statistics for this profile. You can try again or open the profile directly.`}
-        action={<button type="button" className="button button-secondary" onClick={onRetry}>Try again</button>} />}
+      {status === "error" && <div className="platform-state" role="alert">
+        <h3>{title} unavailable</h3><p>{resource.message || "Couldn’t load this profile."}</p>
+        {typeof username === "string" && <button type="button" className="button button-secondary" onClick={onRetry}>Try again</button>}
+      </div>}
+      {status === "idle" && <div className="platform-state">
+        <h3>{typeof username === "string" ? `${title} profile not loaded` : `${title} isn’t linked`}</h3>
+        {typeof username !== "string" && <p>No public username has been linked to this profile.</p>}
+        {typeof username === "string" && <button type="button" className="button button-secondary" onClick={onRetry}>Load {title}</button>}
+      </div>}
+      {status === "success" && !hasData && <div className="platform-state">
+        <h3>No statistics available</h3>
+        <button type="button" className="button button-secondary" onClick={onRetry}>Try again</button>
+      </div>}
       {available && children}
-      {(available || status === "success") && (handle || username) && <footer className="platform-footer">
-        <a href={href} target="_blank" rel="noopener noreferrer" className="platform-profile-link">View {title} profile <Icon name="external" size={15} /></a>
-        <span className="muted">Public profile data</span>
-      </footer>}
     </section>
   )
 }
@@ -55,7 +56,7 @@ const validChartSource = (source) => {
 const ChartImage = ({ src, label }) => {
   const [failed, setFailed] = useState(false)
   return <figure className="platform-chart"><figcaption>{label}</figcaption>
-    {failed ? <p className="platform-chart-error">This external chart is unavailable. The profile metrics above are still available.</p>
+    {failed ? <p className="platform-chart-error">This external chart is unavailable.</p>
       : <img src={src} alt={label} loading="lazy" onError={() => setFailed(true)} />}
   </figure>
 }
@@ -66,7 +67,6 @@ export const ExternalCharts = ({ charts }) => {
   if (!availableCharts.length) return null
   return <details className="platform-chart-details" onToggle={(event) => setOpen(event.currentTarget.open)}>
     <summary><span>Explore external charts</span><Icon name="chevron" size={16} /></summary>
-    <p className="field-hint">Charts are provided by independent services and may be unavailable or update separately.</p>
     {open && <div className="platform-chart-grid">{availableCharts.map(({ src, label }) => <ChartImage key={src} src={src} label={label} />)}</div>}
   </details>
 }

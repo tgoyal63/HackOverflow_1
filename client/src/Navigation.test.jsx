@@ -124,7 +124,7 @@ test("selecting a mobile destination closes the menu and releases the page", asy
 test("unknown routes provide a recovery action instead of a blank screen", () => {
 	route("/this-page-does-not-exist");
 	expect(
-		screen.getByRole("heading", { name: "This page took a wrong turn." }),
+		screen.getByRole("heading", { name: "Page not found" }),
 	).toBeInTheDocument();
 	expect(
 		screen.getByRole("link", { name: "Back to dashboard" }),
@@ -168,16 +168,14 @@ test("profile votes cannot be submitted twice while the first request is pending
 	expect(upvote).toBeEnabled();
 });
 
-test("dashboard greets the signed-in account rather than the last searched developer", () => {
+test("dashboard identifies the signed-in account rather than the last searched developer", () => {
 	context.name = "Bob";
 	context.accountProfile = { name: "Alice", username: "alice" };
 	context.resources = { profile: { status: "success" } };
 	route("/dashboard");
+	expect(screen.getByRole("heading", { name: "Alice" })).toBeInTheDocument();
 	expect(
-		screen.getByRole("heading", { name: "Welcome back, Alice." }),
-	).toBeInTheDocument();
-	expect(
-		screen.queryByRole("heading", { name: "Welcome back, Bob." }),
+		screen.queryByRole("heading", { name: "Bob" }),
 	).not.toBeInTheDocument();
 });
 

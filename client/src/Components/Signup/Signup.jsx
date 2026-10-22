@@ -84,7 +84,6 @@ export const Signup = ({ passRegisterChildData }) => {
       {error && <p className='form-error' role='alert'>{error}</p>}
       <button className='button button-primary auth-submit' type='submit' disabled={isSubmitting}>
         {isSubmitting ? "Creating your account…" : "Create account"}
-        {!isSubmitting && <Icon name='arrowRight' size={18} />}
       </button>
     </form>
   )

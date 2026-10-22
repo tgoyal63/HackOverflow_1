@@ -59,7 +59,6 @@ export const Login = ({ passLoginChildData }) => {
             type={showPassword ? "text" : "password"}
             name='password'
             autoComplete='current-password'
-            placeholder='Enter your password'
             value={values.password}
             onChange={handleChange}
             required
@@ -78,9 +77,7 @@ export const Login = ({ passLoginChildData }) => {
       {error && <p className='form-error' role='alert'>{error}</p>}
       <button className='button button-primary auth-submit' type='submit' disabled={isSubmitting}>
         {isSubmitting ? "Signing in…" : "Sign in"}
-        {!isSubmitting && <Icon name='arrowRight' size={18} />}
       </button>
-      <p className='field-hint auth-privacy'>Your coding profiles stay connected to one account.</p>
     </form>
   )
 }

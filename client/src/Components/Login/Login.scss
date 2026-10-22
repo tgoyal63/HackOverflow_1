@@ -3,47 +3,13 @@
   gap: 20px;
   min-width: 0;
 
-  .field > label {
-    color: var(--text, #f4f5f7);
-    font-size: 0.875rem;
-    font-weight: 600;
-  }
-
-  .password-control {
-    position: relative;
-    min-width: 0;
-
-    > .field-input {
-      padding-right: 50px;
-      width: 100%;
-    }
-  }
-
-  .password-toggle {
-    position: absolute;
-    right: 2px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--muted, #a3aab9);
-    cursor: pointer;
-
-    &:hover { color: var(--text, #f4f5f7); }
-    &:focus-visible { outline: 2px solid var(--accent, #ff7972); outline-offset: -4px; }
-  }
-
-  .auth-submit {
-    min-height: 44px;
-    justify-content: center;
-    width: 100%;
-  }
-
-  .auth-privacy { text-align: center; margin: 0; }
-  .form-error { margin: 0; }
+  .field > label { color: var(--text, #f4f5f7); font-size: 0.875rem; font-weight: 550; }
+  .field-input { border-radius: 6px; }
+  .password-control { position: relative; min-width: 0; }
+  .password-control > .field-input { padding-right: 50px; width: 100%; }
+  .password-toggle { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 6px; background: none; color: var(--muted, #a3aab9); cursor: pointer; }
+  .password-toggle:hover { color: var(--text, #f4f5f7); }
+  .password-toggle:focus-visible { outline: 2px solid var(--focus, #ffb5ad); outline-offset: -4px; }
+  .auth-submit { min-height: 44px; justify-content: center; width: 100%; border-radius: 6px; }
+  .form-error { margin: 0; border-radius: 6px; }
 }

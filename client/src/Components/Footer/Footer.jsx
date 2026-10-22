@@ -7,11 +7,7 @@ export function Footer() {
 	const publicPage = pathname === "/" || pathname === "/register";
 	return (
 		<footer className={publicPage ? "site-footer" : "workspace-footer"}>
-			<span>
-				© {new Date().getFullYear()} HackOverflow
-				<span className="footer-separator">/</span>
-				<span className="footer-tagline">Made for your next chapter.</span>
-			</span>
+			<span>© {new Date().getFullYear()} HackOverflow</span>
 			<nav aria-label="Footer navigation">
 				<Link to="/leaderboard">Leaderboard</Link>
 				<a

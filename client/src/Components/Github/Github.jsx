@@ -12,7 +12,7 @@ const Github = ({ username }) => {
   const hasData = [public_repos, public_gists, followers, following, organizations].some(hasValue)
 
   return (
-    <PlatformPanel platform="github" title="GitHub" eyebrow="Code & collaboration" username={username}
+    <PlatformPanel platform="github" title="GitHub" username={username}
       handle={githubUsername} resource={context.resources?.github} hasData={hasData}
       href={`https://github.com/${encodeURIComponent(githubUsername || username || "")}`}
       onRetry={() => getGithub(username)}>

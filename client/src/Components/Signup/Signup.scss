@@ -1,12 +1,11 @@
 .signup-form {
   gap: 24px;
-
   .signup-section { border: 0; padding: 0; margin: 0; min-width: 0; }
-  .signup-section > legend { float: none; width: auto; margin-bottom: 14px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted, #a3aab9); }
+  .signup-section > legend { float: none; width: auto; margin-bottom: 16px; font-size: 0.875rem; font-weight: 600; color: var(--text, #f4f5f7); }
   .signup-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   .signup-wide { grid-column: 1 / -1; }
-  .signup-platforms { border-top: 1px solid var(--border, #2d313b); padding-top: 22px; }
-  .signup-platforms > .field-hint { margin: -3px 0 16px; }
+  .signup-platforms { border-top: 1px solid var(--border, #34343f); padding-top: 20px; }
+  .signup-platforms > .field-hint { margin: 0 0 16px; }
 }
 
 @media (max-width: 480px) {

@@ -4,14 +4,14 @@ import { toast } from "react-toastify"
 import NavbarComponent from "../../Components/Navbar/NavbarComponent"
 import { Footer } from "../../Components/Footer/Footer"
 import { Icon } from "../../Components/UI/Icon"
-import { Avatar, ErrorState, LoadingState, PageHeader } from "../../Components/UI/Surface"
+import { ErrorState, LoadingState, PageHeader } from "../../Components/UI/Surface"
 import { useAppContext } from "../../Context/appContext"
 import "./Setting.scss"
 
 const platforms = [
-  { key: "github", name: "GitHub", prefix: "github.com/", url: "https://github.com/", icon: "github", mark: "" },
-  { key: "hackerrank", name: "HackerRank", prefix: "hackerrank.com/", url: "https://www.hackerrank.com/", mark: "HR" },
-  { key: "codechef", name: "CodeChef", prefix: "codechef.com/users/", url: "https://www.codechef.com/users/", mark: "CC" },
+  { key: "github", name: "GitHub", prefix: "github.com/", url: "https://github.com/" },
+  { key: "hackerrank", name: "HackerRank", prefix: "hackerrank.com/", url: "https://www.hackerrank.com/" },
+  { key: "codechef", name: "CodeChef", prefix: "codechef.com/users/", url: "https://www.codechef.com/users/" },
 ]
 
 const Setting = () => {
@@ -73,43 +73,34 @@ const Setting = () => {
     <div className='app-page settings-page'>
       <NavbarComponent />
       <main id='main-content' className='workspace'>
-        <PageHeader eyebrow='Your account' title='Account settings' description='Keep your profile and coding accounts in one place.' />
+        <PageHeader title='Account settings' />
         {initialLoading ? <LoadingState label='Loading your account…' /> : (
           <>
             {profile?.status === "error" && <ErrorState title='Your account could not refresh' message={profile.message || "Please try again to load your account details."} onRetry={getUser} />}
             {username && <div className='settings-layout'>
-              <aside className='settings-sidebar'>
-                <section className='panel account-summary' aria-labelledby='account-summary-title'>
-                  <Avatar name={name || username} size='lg' />
-                  <h2 id='account-summary-title'>{name || username}</h2>
-                  <p className='muted account-username'>@{username}</p>
-                  <section className='account-votes' aria-label='Community votes'>
-                    <div><strong>{upvotes ?? "—"}</strong><span>Upvotes</span></div>
-                    <div><strong>{downvotes ?? "—"}</strong><span>Downvotes</span></div>
-                  </section>
-                  <dl className='account-details'>
-                    <div><dt>Username</dt><dd>{username}</dd></div>
-                    <div><dt>Email address</dt><dd>{email || "Not available"}</dd></div>
-                  </dl>
-                  <p className='field-hint'>Your account identity stays the same when you update your coding profiles.</p>
+              <section className='account-summary' aria-labelledby='account-summary-title'>
+                <div className='account-summary-heading'>
+                  <div><h2 id='account-summary-title'>{name || username}</h2><p className='muted account-username'>@{username}</p></div>
+                  <Link className='button button-secondary' to='/changepassword'>Change password</Link>
+                </div>
+                <section className='account-votes' aria-label='Community votes'>
+                  <div><strong>{upvotes ?? "—"}</strong><span>Upvotes</span></div>
+                  <div><strong>{downvotes ?? "—"}</strong><span>Downvotes</span></div>
                 </section>
-                <section className='panel account-security' aria-labelledby='account-security-title'>
-                  <span className='account-security-icon'><Icon name='shield' size={20} /></span>
-                  <h2 id='account-security-title'>Account security</h2>
-                  <p className='muted'>Keep your password private and change it whenever you need to.</p>
-                  <Link className='button button-secondary' to='/changepassword'>Change password<Icon name='arrowRight' size={16} /></Link>
-                </section>
-              </aside>
-              <section className='panel linked-profiles' aria-labelledby='linked-profiles-title'>
+                <dl className='account-details'>
+                  <div><dt>Username</dt><dd>{username}</dd></div>
+                  <div><dt>Email address</dt><dd>{email || "Not available"}</dd></div>
+                </dl>
+              </section>
+              <section className='linked-profiles' aria-labelledby='linked-profiles-title'>
                 <div className='settings-section-heading'>
-                  <div><h2 className='section-title' id='linked-profiles-title'>Connected coding profiles</h2><p className='section-subtitle'>These usernames power your coding dashboard.</p></div>
-                  {!isEdit && <button className='button button-secondary' type='button' ref={editButtonRef} onClick={handleEdit}><Icon name='link' size={16} />Edit profiles</button>}
+                  <h2 className='section-title' id='linked-profiles-title'>Coding profiles</h2>
+                  {!isEdit && <button className='button button-secondary' type='button' ref={editButtonRef} onClick={handleEdit}>Edit profiles</button>}
                 </div>
                 <form aria-label='Coding profiles' onSubmit={handleFormSubmit} aria-busy={isSaving}>
                   <div className='linked-profile-list'>
                     {platforms.map((platform) => (
                       <div className='linked-profile-row' key={platform.key}>
-                        <span className={`linked-profile-mark mark-${platform.key}`} aria-hidden='true'>{platform.icon ? <Icon name={platform.icon} size={22} /> : platform.mark}</span>
                         <div className='linked-profile-content'>
                           {isEdit ? <div className='field'>
                             <label htmlFor={`settings-${platform.key}`}>{platform.name} username</label>
@@ -120,7 +111,7 @@ const Setting = () => {
                             <p className='muted'>{handles[platform.key] || "Not available"}</p>
                           </>}
                         </div>
-                        {!isEdit && handles[platform.key] && <a className='button button-quiet profile-visit' href={`${platform.url}${encodeURIComponent(handles[platform.key])}`} target='_blank' rel='noopener noreferrer' aria-label={`Open ${platform.name} profile`}><Icon name='external' size={17} /></a>}
+                        {!isEdit && handles[platform.key] && <a className='button button-quiet profile-visit' href={`${platform.url}${encodeURIComponent(handles[platform.key])}`} target='_blank' rel='noopener noreferrer' aria-label={`Open ${platform.name} profile`}>Open profile<Icon name='external' size={15} /></a>}
                       </div>
                     ))}
                   </div>

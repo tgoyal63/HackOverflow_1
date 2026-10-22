@@ -1,9 +1,8 @@
 import { Icon } from "./Icon";
-export function PageHeader({ eyebrow, title, description, action }) {
+export function PageHeader({ title, description, action }) {
 	return (
 		<header className="page-heading">
 			<div>
-				{eyebrow && <p className="eyebrow">{eyebrow}</p>}
 				<h1>{title}</h1>
 				{description && <p className="page-description">{description}</p>}
 			</div>

@@ -10,7 +10,7 @@ const CodeChef = ({ username }) => {
     if (typeof username === "string") getCodechef(username)
   }, [getCodechef, username])
   const hasData = [ratings, global, country, div, language, band, ...Object.values(submissionStats || {})].some(hasValue)
-  return <PlatformPanel platform="codechef" title="CodeChef" eyebrow="Competitive programming" username={username}
+  return <PlatformPanel platform="codechef" title="CodeChef" username={username}
     handle={codechefUsername} resource={context.resources?.codechef} hasData={hasData}
     href={`https://www.codechef.com/users/${encodeURIComponent(codechefUsername || username || "")}`}
     onRetry={() => getCodechef(username)}>
